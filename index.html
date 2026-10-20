@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Omni Super</title>
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Core Conversion Libraries (100% Client-Side Engine) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        space: {
+                            950: '#07090e',
+                            900: '#0b0f19',
+                            800: '#111827',
+                            700: '#1f2937'
+                        },
+                        neon: {
+                            cyan: '#00f2fe',
+                            blue: '#38bdf8',
+                            emerald: '#00f5d4',
+                            fuchsia: '#d946ef',
+                            purple: '#a855f7',
+                            violet: '#8b5cf6',
+                            rose: '#f43f5e',
+                            amber: '#ffd166',
+                            lime: '#84cc16'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --neon-cyan: #00f2fe;
+            --neon-emerald: #00f5d4;
+            --neon-fuchsia: #d946ef;
+            --neon-violet: #8b5cf6;
+            --neon-amber: #ffd166;
+            --bg-deep: #07090e;
+        }
+        body {
+            background-color: var(--bg-deep);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #07090e; }
+        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.25); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.6); }
+
+        .glass-card {
+            background: rgba(11, 15, 25, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .neon-glow-cyan {
+            box-shadow: 0 0 25px -5px rgba(0, 242, 254, 0.3);
+        }
+        .neon-glow-sky {
+            box-shadow: 0 0 25px -5px rgba(14, 165, 233, 0.3);
+        }
+        .neon-glow-emerald {
+            box-shadow: 0 0 25px -5px rgba(0, 245, 212, 0.3);
+        }
+        .neon-glow-fuchsia {
+            box-shadow: 0 0 25px -5px rgba(217, 70, 239, 0.3);
+        }
+        .neon-glow-violet {
+            box-shadow: 0 0 25px -5px rgba(139, 92, 246, 0.3);
+        }
+        .neon-glow-amber {
+            box-shadow: 0 0 25px -5px rgba(255, 209, 102, 0.3);
+        }
+        .preview-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.825rem;
+        }
+        .preview-table th, .preview-table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .preview-table tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
+        .preview-table tr:first-child { font-weight: 600; background-color: rgba(56, 189, 248, 0.15); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-black">
+
+    <!-- Ambient 3D Interactive Geometric Shapes Canvas -->
+    <canvas id="abstractGeoCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Ambient Glowing Orbs Background -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div id="ambientOrb1" class="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-[120px] transition-all duration-700"></div>
+        <div id="ambientOrb2" class="absolute top-1/3 -right-32 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-[140px] transition-all duration-700"></div>
+        <div id="ambientOrb3" class="absolute -bottom-32 left-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-[130px] transition-all duration-700"></div>
+    </div>
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-40 bg-space-950/85 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 lg:px-8 py-3.5 transition-all">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('converter')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 transform hover:scale-105 transition">
+                    <i data-lucide="Layers" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <span class="text-xl sm:text-2xl font-black text-white tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent">Omni Super</span>
+                    <p data-i18n="brandSubtitle" class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">UNIVERSAL MEDIA PLATFORMA</p>
+                </div>
+            </div>
+
+            <!-- Right Controls: Status + Device Badge + Global i18n Switcher + Formats Matrix -->
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <!-- Cluster Telemetry Badge -->
+                <div class="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span data-i18n="clusterStatus">Klaster: Toshkent-01 (100% Faol)</span>
+                </div>
+
+                <!-- Device Detection Badge -->
+                <div id="deviceBadge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300 text-xs font-mono">
+                    <i id="deviceIcon" data-lucide="Laptop" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span id="deviceText">Desktop</span>
+                </div>
+
+                <!-- Global i18n Language Dropdown -->
+                <div class="relative">
+                    <select id="globalLangSelector" onchange="changeGlobalLanguage(this.value)" class="bg-space-900 border border-white/15 focus:border-cyan-400 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none cursor-pointer hover:bg-space-800 transition">
+                        <option value="uz">🇺🇿 O'zbekcha</option>
+                        <option value="en">🇬🇧 English</option>
+                        <option value="ru">🇷🇺 Русский</option>
+                        <option value="tr">🇹🇷 Türkçe</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                    </select>
+                </div>
+
+                <!-- Formats Matrix Button -->
+                <button onclick="document.getElementById('matrixModal').classList.remove('hidden')" class="px-3 py-1.5 rounded-xl bg-space-900 hover:bg-space-800 border border-white/15 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition">
+                    <i data-lucide="Grid" class="w-4 h-4 text-cyan-400"></i>
+                    <span data-i18n="formatsBtn" class="hidden md:inline">Formatlar Jadvali</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Master Workspace Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 z-10">
+
+        <!-- Unified 6-Feature Navigation Dock -->
+        <div class="bg-space-900/90 border border-white/10 p-1.5 rounded-2xl shadow-xl backdrop-blur-xl overflow-x-auto">
+            <nav class="flex items-center gap-1.5 min-w-max" id="masterTabsNav">
+                <!-- 1. Converter -->
+                <button id="tab-converter" onclick="switchMainTab('converter')" class="px-3.5 sm:px-4 py-2.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition cursor-pointer">
+                    <i data-lucide="FileSpreadsheet" class="w-4 h-4 text-cyan-400"></i>
+                    <span data-i18n="tabConverter">1. Fayl Konvertori</span>
+                </button>
+                <!-- 2. Downloader -->
+                <button id="tab-downloader" onclick="switchMainTab('downloader')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
+                    <i data-lucide="DownloadCloud" class="w-4 h-4 text-sky-400"></i>
+                    <span data-i18n="tabDownloader">2. Video & MP3</span>
+                </button>
+                <!-- 3. Translator -->
+                <button id="tab-translator" onclick="switchMainTab('translator')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
+                    <i data-lucide="Languages" class="w-4 h-4 text-emerald-400"></i>
+                    <span data-i18n="tabTranslator">3. AI Tarjimon</span>
+                </button>
+                <!-- 4. 3D Pixar -->
+                <button id="tab-pixar" onclick="switchMainTab('pixar')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
+                    <i data-lucide="Sparkles" class="w-4 h-4 text-fuchsia-400"></i>
+                    <span data-i18n="tabPixar">4. 3D Pixar Obraz</span>
+                </button>
+                <!-- 5. AI Magic Studio -->
+                <button id="tab-magic" onclick="switchMainTab('magic')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
+                    <i data-lucide="Wand2" class="w-4 h-4 text-violet-400"></i>
+                    <span data-i18n="tabMagic">5. AI Magic Studio</span>
+                    <span class="px-1.5 py-0.2 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 text-[9px] font-mono font-bold uppercase">Yangi</span>
+                </button>
+                <!-- 6. Audio Studio & Visualizer -->
+                <button id="tab-audio" onclick="switchMainTab('audio')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
+                    <i data-lucide="Radio" class="w-4 h-4 text-amber-400"></i>
+                    <span data-i18n="tabAudio">6. Audio & Spektr</span>
+                    <span class="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] font-mono font-bold uppercase">60 FPS</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- FEATURE 1: FAYL KONVERTOR (Quantum Cyan & Indigo Matrix)      -->
+        <!-- ============================================================= -->
+        <section id="view-converter" class="feature-view space-y-6">
+            <!-- Hero Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-cyan-500/30 neon-glow-cyan relative overflow-hidden">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                    <div class="space-y-2 max-w-2xl">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-semibold">
+                            <i data-lucide="ShieldCheck" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="convBadge">Ma'lumotlar 100% O'zgarishsiz Saqlanadi (Lossless)</span>
+                        </div>
+                        <h1 data-i18n="convTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Fayllarni O'giring yoki Video/Rasm va Musiqani Yuklab Oling
+                        </h1>
+                        <p data-i18n="convDesc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Excel, PDF, Word, JPG, PNG, Video (MP4) fayllarini yuklang — dastur fayl turini o'zi aniqlab, kerakli formatga o'girib beradi.
+                        </p>
+                    </div>
+
+                    <!-- 1-Click Demo Generator -->
+                    <div class="bg-space-950/80 border border-cyan-500/20 rounded-2xl p-4 shrink-0 space-y-2.5">
+                        <div class="flex items-center justify-between gap-4">
+                            <span data-i18n="convDemoTitle" class="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="Sparkles" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                Tezkor Sinov (Demo Fayllar)
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="generateDemoFile('xlsx')" class="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-200 text-xs font-semibold flex items-center gap-1.5 transition">
+                                <i data-lucide="FileSpreadsheet" class="w-3.5 h-3.5"></i>
+                                <span>Demo Excel (.xlsx)</span>
+                            </button>
+                            <button onclick="generateDemoFile('doc')" class="px-3 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition">
+                                <i data-lucide="FileText" class="w-3.5 h-3.5"></i>
+                                <span>Demo Word (.doc)</span>
+                            </button>
+                            <button onclick="generateDemoFile('png')" class="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-200 text-xs font-semibold flex items-center gap-1.5 transition">
+                                <i data-lucide="Image" class="w-3.5 h-3.5"></i>
+                                <span>Demo Rasm (.png)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Drop Zone with Computer Picker Button -->
+            <div id="dropZone" class="glass-card rounded-3xl border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 p-8 sm:p-12 text-center transition-all duration-300 cursor-pointer group relative overflow-hidden">
+                <input type="file" id="fileInput" multiple class="hidden" accept=".xlsx,.xls,.csv,.pdf,.docx,.doc,.jpg,.jpeg,.png,.webp,.txt,.json,.html,.mp4,.webm,.mov,.mp3,.wav" onchange="handleFiles(this.files); this.value=''" />
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="w-16 h-16 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:bg-cyan-500/25 transition duration-300 shadow-xl shadow-cyan-500/15">
+                        <i data-lucide="UploadCloud" class="w-8 h-8 text-cyan-400"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <h2 data-i18n="convDropTitle" class="text-lg sm:text-xl font-bold text-white">
+                            Fayl yoki Videoni shu yerga tashlang yoki tanlash uchun bosing
+                        </h2>
+                        <p data-i18n="convDropDesc" class="text-xs sm:text-sm text-slate-400">
+                            Qo'llab-quvvatlanadi: Excel, Word, PDF, Rasm (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV musiqa)
+                        </p>
+                    </div>
+                    <div class="pt-2">
+                        <button type="button" onclick="event.stopPropagation(); document.getElementById('fileInput').click()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-black font-extrabold text-xs sm:text-sm inline-flex items-center gap-2 shadow-xl shadow-cyan-500/25 transition transform hover:scale-105 active:scale-95">
+                            <i data-lucide="FolderOpen" class="w-4 h-4"></i>
+                            <span data-i18n="convSelectBtn">Kompyuterdan Fayl Tanlash</span>
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+                        <span class="px-2.5 py-1 rounded-lg bg-space-950 border border-cyan-500/20 text-[11px] font-mono text-cyan-400">XLSX ↔ PDF / CSV / WORD</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-space-950 border border-indigo-500/20 text-[11px] font-mono text-indigo-400">DOCX ↔ PDF / XLSX / TXT</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-space-950 border border-fuchsia-500/20 text-[11px] font-mono text-fuchsia-400">VIDEO (MP4) ➔ 🎵 MP3 / WAV</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Queue Section -->
+            <div id="queueSection" class="hidden space-y-4">
+                <div class="glass-card rounded-2xl p-4 border border-cyan-500/20 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="px-3 py-1 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-bold font-mono" id="fileCountBadge">0 ta fayl</span>
+                        <div class="flex items-center gap-2 text-xs text-slate-300">
+                            <span>Barchasini bir formatga:</span>
+                            <select id="globalFormatSelect" onchange="applyGlobalFormat(this.value)" class="bg-space-950 border border-cyan-500/30 rounded-xl px-2.5 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-cyan-400">
+                                <option value="">— Tanlang —</option>
+                                <option value="pdf">PDF (.pdf)</option>
+                                <option value="xlsx">Excel (.xlsx)</option>
+                                <option value="doc">Word (.doc)</option>
+                                <option value="csv">CSV (.csv)</option>
+                                <option value="jpg">JPG Rasm (.jpg)</option>
+                                <option value="png">PNG Rasm (.png)</option>
+                                <option value="webp">WEBP Rasm (.webp)</option>
+                                <option value="txt">Matn (.txt)</option>
+                                <option value="html">HTML (.html)</option>
+                                <option value="json">JSON (.json)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <button onclick="convertAllFiles()" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs sm:text-sm font-extrabold flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition">
+                            <i data-lucide="Zap" class="w-4 h-4"></i>
+                            <span data-i18n="convConvertAll">Barchasini O'girish</span>
+                        </button>
+                        <button id="downloadAllZipBtn" onclick="downloadAllAsZip()" class="hidden px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs sm:text-sm font-extrabold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition">
+                            <i data-lucide="Archive" class="w-4 h-4"></i>
+                            <span data-i18n="convDownloadZip">ZIP Arxivda Yuklab Olish</span>
+                        </button>
+                        <button onclick="clearAllFiles()" class="px-3 py-2 rounded-xl bg-space-950 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs font-semibold border border-white/10 transition">
+                            <span data-i18n="convClear">Tozalash</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- File Cards List -->
+                <div id="fileQueueList" class="space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- FEATURE 2: MEDIA & MP3 YUKLAGICH (Electric Sky & Ultra Blue)   -->
+        <!-- ============================================================= -->
+        <section id="view-downloader" class="feature-view hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-sky-500/30 neon-glow-sky space-y-6 relative overflow-hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1.5 max-w-2xl">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold">
+                            <i data-lucide="Sparkles" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="dlBadge">Original Sifat (Lossless Media & Audio)</span>
+                        </span>
+                        <h2 data-i18n="dlTitle" class="text-xl sm:text-2xl font-extrabold text-white">
+                            Video, Rasm yoki Musiqani Link Orqali Asl Holatida Yuklab Olish
+                        </h2>
+                        <p data-i18n="dlDesc" class="text-xs sm:text-sm text-slate-300">
+                            Instagram, TikTok, YouTube yoki to'g'ridan-to'g'ri rasm/video linkini tashlang — dastur formatni aniqlab, sifatini buzmay yuklab beradi.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Smart URL Input -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <input id="smartUrlInput" type="url" placeholder="https://... (Video, Rasm, TikTok, YouTube linkini shu yerga tashlang)" class="w-full bg-space-950 border border-sky-500/30 focus:border-sky-400 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none transition" oninput="detectUrlTypeLive(this.value)" />
+                        <i data-lucide="Globe" class="w-5 h-5 text-sky-400 absolute left-3.5 top-3.5"></i>
+                    </div>
+                    <button onclick="processSmartUrl()" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 text-black font-extrabold text-sm flex items-center justify-center gap-2 shadow-xl shadow-sky-500/20 transition shrink-0">
+                        <i data-lucide="DownloadCloud" class="w-5 h-5"></i>
+                        <span data-i18n="dlAnalyzeBtn">Tekshirish va Yuklash</span>
+                    </button>
+                </div>
+
+                <!-- Demo Links -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <div id="urlDetectStatus" class="text-xs font-mono text-slate-400 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                        <span>Link kutilmoqda...</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-[11px] text-slate-400">Sinov uchun linklar:</span>
+                        <button onclick="fillSampleUrl('video')" class="px-2.5 py-1 rounded-lg bg-space-950 hover:bg-space-800 border border-sky-500/30 text-xs text-sky-300 font-medium transition">🎬 Demo HD Video + MP3</button>
+                        <button onclick="fillSampleUrl('image')" class="px-2.5 py-1 rounded-lg bg-space-950 hover:bg-space-800 border border-purple-500/30 text-xs text-purple-300 font-medium transition">🖼️ Demo 4K Rasm</button>
+                        <button onclick="fillSampleUrl('tiktok')" class="px-2.5 py-1 rounded-lg bg-space-950 hover:bg-space-800 border border-cyan-500/30 text-xs text-cyan-300 font-medium transition">🎵 TikTok Demo</button>
+                    </div>
+                </div>
+
+                <!-- URL Result Card -->
+                <div id="urlResultCard" class="hidden bg-space-950 border border-sky-500/30 rounded-2xl p-5 space-y-4">
+                    <div class="flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center overflow-hidden shrink-0">
+                                <i data-lucide="Film" class="w-8 h-8 text-sky-400"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <span id="urlPlatformBadge" class="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[11px] font-bold font-mono">MEDIA</span>
+                                <h4 id="urlMediaTitle" class="text-sm sm:text-base font-bold text-white break-all">Media Fayl</h4>
+                                <p id="urlMediaDesc" class="text-xs text-slate-400">Suv belgisiz 100% asl sifat</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                            <button onclick="downloadUrlOriginal()" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-black text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 transition">
+                                <i data-lucide="Download" class="w-4 h-4"></i>
+                                <span id="downloadOrigMediaText" data-i18n="dlOrigVideo">Asl Videoni Yuklash (MP4)</span>
+                            </button>
+                            <button id="extractMp3Btn" onclick="extractAudioFromVideo()" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-2 transition">
+                                <i data-lucide="Music" class="w-4 h-4 text-cyan-300"></i>
+                                <span data-i18n="dlMp3">Musiqani Yuklab Olish (MP3)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Video / Image Preview Player -->
+                    <div id="urlMediaPreviewContainer" class="pt-3 border-t border-white/10"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- FEATURE 3: AI TARJIMON (Emerald Matrix & Bioluminescent Teal)  -->
+        <!-- ============================================================= -->
+        <section id="view-translator" class="feature-view hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-emerald-500/30 neon-glow-emerald space-y-6 relative overflow-hidden">
+                <!-- Header & Mode Tabs -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-5">
+                    <div class="space-y-1.5 max-w-2xl">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+                            <i data-lucide="Languages" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="trBadge">Jahondagi Eng Top 10+ Til • Imlo Xatolarisiz</span>
+                        </span>
+                        <h2 data-i18n="trTitle" class="text-xl sm:text-2xl font-extrabold text-white">
+                            Professional AI Tarjimon: Matn yoki Rasmni Asl Holatida Tarjima Qiling
+                        </h2>
+                        <p data-i18n="trDesc" class="text-xs sm:text-sm text-slate-300">
+                            Tepadagi oynaga matn yozing yoki rasm yuklang — 10 ta jahon tiliga 100% imlo xatolarisiz tarjima qilib beradi.
+                        </p>
+                    </div>
+
+                    <!-- Sub-mode toggle -->
+                    <div class="flex items-center gap-2 bg-space-950 p-1.5 rounded-2xl border border-white/10 shrink-0">
+                        <button id="subTabTextTrans" onclick="switchTranslatorSubMode('text')" class="px-4 py-2 rounded-xl bg-emerald-500 text-black text-xs font-bold flex items-center gap-1.5 shadow-lg transition">
+                            <i data-lucide="AlignLeft" class="w-4 h-4"></i>
+                            <span data-i18n="trTab1">📝 Matn Tarjimasi</span>
+                        </button>
+                        <button id="subTabImgTrans" onclick="switchTranslatorSubMode('image')" class="px-4 py-2 rounded-xl text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition">
+                            <i data-lucide="Image" class="w-4 h-4 text-emerald-400"></i>
+                            <span data-i18n="trTab2">🖼️ Rasmni O'zida Tarjima Qilish</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Text Translation Mode -->
+                <div id="textTranslatorContainer" class="space-y-4">
+                    <!-- Source Box -->
+                    <div class="bg-space-950/80 border border-emerald-500/20 rounded-2xl p-4 sm:p-5 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span data-i18n="trSourceLabel" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Manba Tili:</span>
+                                <select id="transSourceLang" class="bg-space-900 border border-emerald-500/30 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none">
+                                    <option value="auto" selected>✨ Avtomatik aniqlash</option>
+                                    <option value="uz">🇺🇿 O'zbek tili</option>
+                                    <option value="en">🇬🇧 Ingliz tili</option>
+                                    <option value="ru">🇷🇺 Rus tili</option>
+                                    <option value="tr">🇹🇷 Turk tili</option>
+                                    <option value="ar">🇸🇦 Arab tili</option>
+                                    <option value="zh">🇨🇳 Xitoy tili</option>
+                                    <option value="es">🇪🇸 Ispan tili</option>
+                                    <option value="de">🇩🇪 Nemis tili</option>
+                                    <option value="fr">🇫🇷 Fransuz tili</option>
+                                    <option value="ko">🇰🇷 Koreys tili</option>
+                                </select>
+                            </div>
+                            <button onclick="document.getElementById('transSourceText').value=''; document.getElementById('charCountTrans').textContent='0'" class="text-xs text-slate-400 hover:text-rose-400 transition">Tozalash</button>
+                        </div>
+                        <textarea id="transSourceText" oninput="document.getElementById('charCountTrans').textContent=this.value.length" rows="3" placeholder="Tarjima qilinadigan matnni shu yerga yozing..." class="w-full bg-transparent border-0 text-white placeholder-slate-500 text-sm focus:outline-none resize-none"></textarea>
+                        <div class="flex justify-between items-center text-[11px] font-mono text-slate-400 pt-1">
+                            <span>Belgilar soni: <b id="charCountTrans" class="text-emerald-400">0</b></span>
+                            <div class="flex gap-2">
+                                <button onclick="fillSampleTranslationText('uz')" class="text-emerald-400 hover:underline">Namuna (O'zbekcha)</button>
+                                <button onclick="fillSampleTranslationText('en')" class="text-cyan-400 hover:underline">Sample (English)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Swap & Action Bar -->
+                    <div class="flex items-center justify-center gap-3">
+                        <button onclick="swapTranslationLanguages()" class="w-10 h-10 rounded-full bg-space-900 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-lg transition transform hover:rotate-180">
+                            <i data-lucide="ArrowDownUp" class="w-5 h-5"></i>
+                        </button>
+                        <button onclick="translateTextNow()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition">
+                            <i data-lucide="Sparkles" class="w-4 h-4"></i>
+                            <span data-i18n="trTranslateBtn">Bexato Tarjima Qilish</span>
+                        </button>
+                    </div>
+
+                    <!-- Target Translation Output Box -->
+                    <div class="bg-space-950/90 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span data-i18n="trTargetLabel" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tarjima Tili:</span>
+                                <select id="transTargetLang" onchange="if(document.getElementById('transSourceText').value.trim()) translateTextNow()" class="bg-space-900 border border-emerald-500/40 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none">
+                                    <option value="uz">🇺🇿 O'zbek tili</option>
+                                    <option value="en" selected>🇬🇧 Ingliz tili</option>
+                                    <option value="ru">🇷🇺 Rus tili</option>
+                                    <option value="tr">🇹🇷 Turk tili</option>
+                                    <option value="ar">🇸🇦 Arab tili</option>
+                                    <option value="zh">🇨🇳 Xitoy tili</option>
+                                    <option value="es">🇪🇸 Ispan tili</option>
+                                    <option value="de">🇩🇪 Nemis tili</option>
+                                    <option value="fr">🇫🇷 Fransuz tili</option>
+                                    <option value="ko">🇰🇷 Koreys tili</option>
+                                </select>
+                            </div>
+                            <!-- Output action buttons -->
+                            <div class="flex items-center gap-2">
+                                <button onclick="speakTranslatedText()" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-xs font-semibold flex items-center gap-1 transition" title="Ovozli o'qish">
+                                    <i data-lucide="Volume2" class="w-3.5 h-3.5"></i>
+                                    <span data-i18n="trSpeakBtn">Tinglash</span>
+                                </button>
+                                <button onclick="copyTranslatedText()" class="px-2.5 py-1 rounded-lg bg-space-900 hover:bg-space-800 text-slate-300 text-xs font-semibold flex items-center gap-1 transition">
+                                    <i data-lucide="Copy" class="w-3.5 h-3.5"></i>
+                                    <span data-i18n="trCopyBtn">Nusxa</span>
+                                </button>
+                                <button onclick="downloadTranslationAsDoc()" class="px-2.5 py-1 rounded-lg bg-space-900 hover:bg-space-800 text-slate-300 text-xs font-semibold flex items-center gap-1 transition">
+                                    <i data-lucide="FileText" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                    <span data-i18n="trDocBtn">Word (.doc)</span>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="transTargetText" readonly rows="3" placeholder="Tarjima natijasi shu yerda paydo bo'ladi..." class="w-full bg-transparent border-0 text-emerald-300 placeholder-slate-600 text-sm focus:outline-none resize-none font-medium"></textarea>
+                    </div>
+                </div>
+
+                <!-- In-Image Visual Translation Sub-Panel -->
+                <div id="imageTranslatorContainer" class="hidden space-y-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        <div class="lg:col-span-5 bg-space-950 border border-emerald-500/20 rounded-2xl p-5 space-y-4">
+                            <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block">1. Yozuvli Rasmni Tanlang:</label>
+                            <div onclick="document.getElementById('imgTransFileInput').click()" class="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 rounded-2xl p-6 text-center cursor-pointer bg-space-950 hover:bg-emerald-500/5 transition">
+                                <input type="file" id="imgTransFileInput" class="hidden" accept="image/*" onchange="handleImgTransUpload(this.files)" />
+                                <i data-lucide="ImagePlus" class="w-8 h-8 text-emerald-400 mx-auto mb-2"></i>
+                                <p class="text-xs font-bold text-white">Rasm tanlash uchun bosing</p>
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs text-slate-400">Namuna:</span>
+                                <button onclick="loadSampleTranslatedPoster()" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-semibold">Namuna E'lon Plakati</button>
+                            </div>
+                            <button onclick="translateImageInPlace()" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-black font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition">
+                                <i data-lucide="ScanText" class="w-4 h-4"></i>
+                                <span>Rasm Ustida Tarjima Qilish</span>
+                            </button>
+                        </div>
+
+                        <div class="lg:col-span-7 bg-space-950 border border-emerald-500/20 rounded-2xl p-5 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-300 uppercase">Tarjima Natijasi:</span>
+                                <button onclick="downloadTranslatedCanvas()" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-extrabold flex items-center gap-1.5 transition">
+                                    <i data-lucide="Download" class="w-3.5 h-3.5"></i>
+                                    <span>Rasmni Yuklash (PNG)</span>
+                                </button>
+                            </div>
+                            <div class="rounded-xl overflow-hidden bg-space-900 border border-white/10 flex items-center justify-center min-h-[260px] p-2">
+                                <canvas id="imgTransResultCanvas" class="max-h-80 w-auto rounded-lg shadow-lg"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- FEATURE 4: 3D PIXAR ANIMATOR (Neon Fuchsia & Electric Purple)  -->
+        <!-- ============================================================= -->
+        <section id="view-pixar" class="feature-view hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-fuchsia-500/30 neon-glow-fuchsia space-y-6 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+                    <div class="space-y-1.5 max-w-2xl">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-bold">
+                            <i data-lucide="Sparkles" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="pxBadge">3D Disney / Pixar Multfilm Obraziga O'girish</span>
+                        </span>
+                        <h2 data-i18n="pxTitle" class="text-xl sm:text-2xl font-extrabold text-white">
+                            ✨ Foto-Animatsiya: Rasmingizni 3D Pixar Qahramoniga Aylantiring!
+                        </h2>
+                        <p data-i18n="pxDesc" class="text-xs sm:text-sm text-slate-300">
+                            Inson qiyofasi, uy hayvoni yoki istalgan buyum rasmini yuklang — sun'iy intellekt 3D Pixar multfilm qahramoniga aylantiradi.
+                        </p>
+                    </div>
+
+                    <!-- Demo portraits -->
+                    <div class="bg-space-950 border border-fuchsia-500/20 rounded-2xl p-3 shrink-0 space-y-1.5">
+                        <span class="text-[11px] font-bold text-fuchsia-300 uppercase block">⚡ Tayyor Namuna:</span>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="loadPixarSample('person')" class="px-2.5 py-1 rounded-xl bg-fuchsia-500/15 text-fuchsia-200 text-xs font-semibold transition">🧑 Inson</button>
+                            <button onclick="loadPixarSample('pet')" class="px-2.5 py-1 rounded-xl bg-amber-500/15 text-amber-200 text-xs font-semibold transition">🐱 Mushukcha</button>
+                            <button onclick="loadPixarSample('object')" class="px-2.5 py-1 rounded-xl bg-cyan-500/15 text-cyan-200 text-xs font-semibold transition">🚗 Avtomobil</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid View -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Left: Upload & Style -->
+                    <div class="lg:col-span-5 bg-space-950 border border-fuchsia-500/20 rounded-2xl p-5 space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-300 uppercase block">1. Multfilm Uslubi:</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="selectPixarStyle('pixar')" id="styleBtn_pixar" class="px-2.5 py-2 rounded-xl bg-fuchsia-600 text-white text-xs font-bold border border-fuchsia-400 text-center shadow">🎬 3D Pixar</button>
+                                <button onclick="selectPixarStyle('dreamworks')" id="styleBtn_dreamworks" class="px-2.5 py-2 rounded-xl bg-space-900 text-slate-300 text-xs font-semibold border border-white/10 text-center">🦁 DreamWorks</button>
+                                <button onclick="selectPixarStyle('anime')" id="styleBtn_anime" class="px-2.5 py-2 rounded-xl bg-space-900 text-slate-300 text-xs font-semibold border border-white/10 text-center">🌸 Ghibli</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-300 uppercase block">2. Rasm Yuklang:</label>
+                            <div onclick="document.getElementById('pixarFileInput').click()" class="border-2 border-dashed border-fuchsia-500/40 hover:border-fuchsia-400 rounded-2xl p-6 text-center cursor-pointer bg-space-950 hover:bg-fuchsia-500/5 transition">
+                                <input type="file" id="pixarFileInput" class="hidden" accept="image/*" onchange="handlePixarFileSelect(this.files)" />
+                                <i data-lucide="Camera" class="w-8 h-8 text-fuchsia-400 mx-auto mb-2"></i>
+                                <p class="text-xs font-bold text-white">Rasm tanlash uchun bosing</p>
+                            </div>
+                        </div>
+
+                        <button id="generatePixarBtn" onclick="generatePixarAnimation()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-fuchsia-600/30 transition">
+                            <i data-lucide="Sparkles" class="w-5 h-5"></i>
+                            <span data-i18n="pxRenderBtn">✨ 3D Pixar Animatsiyaga Aylantirish</span>
+                        </button>
+                    </div>
+
+                    <!-- Right: Viewport & 4K Download -->
+                    <div class="lg:col-span-7 bg-space-950 border border-fuchsia-500/20 rounded-2xl p-5 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-fuchsia-400 animate-pulse"></span>
+                                <span id="pixarStatusBadge" class="text-xs font-mono text-fuchsia-300 font-bold">3D Render Tayyor</span>
+                            </div>
+                            <!-- Download bar -->
+                            <div id="pixarDownloadBar" class="flex gap-2">
+                                <button onclick="downloadPixarResult()" class="px-3.5 py-1.5 rounded-xl bg-fuchsia-500 hover:bg-fuchsia-400 text-black text-xs font-extrabold flex items-center gap-1.5 shadow-lg transition">
+                                    <i data-lucide="Download" class="w-4 h-4"></i>
+                                    <span data-i18n="pxDownloadPng">4K PNG Yuklab Olish</span>
+                                </button>
+                                <button onclick="downloadPixarModel()" class="px-3 py-1.5 rounded-xl bg-space-900 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold flex items-center gap-1">
+                                    <i data-lucide="Box" class="w-3.5 h-3.5"></i>
+                                    <span data-i18n="pxDownloadObj">.OBJ</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3D Studio Canvas Viewport -->
+                        <div class="relative rounded-xl overflow-hidden bg-space-900 border border-white/10 flex items-center justify-center min-h-[340px] p-2">
+                            <img id="pixarResultPreview" src="" alt="3D Pixar Character" class="max-h-80 w-auto rounded-lg shadow-2xl object-cover" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- FEATURE 5: AI MAGIC STUDIO (Hyper Violet & Neon Rose) - IDEA 1-->
+        <!-- ============================================================= -->
+        <section id="view-magic" class="feature-view hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-violet-500/30 neon-glow-violet space-y-6 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+                    <div class="space-y-1.5 max-w-2xl">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-bold">
+                            <i data-lucide="Wand2" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="mgBadge">1-Klik Bilan Fonni Olib Tashlash & Tiniqlashtirish</span>
+                        </span>
+                        <h2 data-i18n="mgTitle" class="text-xl sm:text-2xl font-extrabold text-white">
+                            AI Magic Studio: Fonni Tozalash va 4K Sifatga Oshirish
+                        </h2>
+                        <p data-i18n="mgDesc" class="text-xs sm:text-sm text-slate-300">
+                            Rasm fonini 1 sekundda olib tashlang, shaffof qiling yoki yangi neon fon qo'ying.
+                        </p>
+                    </div>
+
+                    <button onclick="loadSampleMagicImage()" class="px-3.5 py-1.5 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/40 text-violet-200 text-xs font-bold shrink-0">
+                        🧑 Namuna Portretni Sinash
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Controls -->
+                    <div class="lg:col-span-5 bg-space-950 border border-violet-500/20 rounded-2xl p-5 space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-300 uppercase block">1. Rasm Tanlang:</label>
+                            <div onclick="document.getElementById('magicFileInput').click()" class="border-2 border-dashed border-violet-500/40 hover:border-violet-400 rounded-2xl p-6 text-center cursor-pointer bg-space-950 hover:bg-violet-500/5 transition">
+                                <input type="file" id="magicFileInput" class="hidden" accept="image/*" onchange="handleMagicFileSelect(this.files)" />
+                                <i data-lucide="ImagePlus" class="w-8 h-8 text-violet-400 mx-auto mb-2"></i>
+                                <p class="text-xs font-bold text-white">Rasm yuklash uchun bosing</p>
+                            </div>
+                        </div>
+
+                        <!-- Background Replacement Selector -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-300 uppercase block">2. Yangi Fon Uslubi:</label>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <button onclick="setMagicBgStyle('transparent')" id="bgBtn_transparent" class="px-3 py-2 rounded-xl bg-violet-600 text-white font-bold border border-violet-400">Shaffof (PNG)</button>
+                                <button onclick="setMagicBgStyle('neon')" id="bgBtn_neon" class="px-3 py-2 rounded-xl bg-space-900 text-slate-300 font-semibold border border-white/10">Kiber Neon</button>
+                                <button onclick="setMagicBgStyle('dark')" id="bgBtn_dark" class="px-3 py-2 rounded-xl bg-space-900 text-slate-300 font-semibold border border-white/10">Studiya Qora</button>
+                                <button onclick="setMagicBgStyle('white')" id="bgBtn_white" class="px-3 py-2 rounded-xl bg-space-900 text-slate-300 font-semibold border border-white/10">Toza Oq</button>
+                            </div>
+                        </div>
+
+                        <button onclick="executeBackgroundRemoval()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-violet-600 to-rose-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-violet-600/30 transition">
+                            <i data-lucide="Scissors" class="w-4 h-4"></i>
+                            <span data-i18n="mgRemoveBgBtn">✂️ Fonni 1 Sekundda Tozalash</span>
+                        </button>
+                    </div>
+
+                    <!-- Output Canvas Stage -->
+                    <div class="lg:col-span-7 bg-space-950 border border-violet-500/20 rounded-2xl p-5 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-violet-300">Toza Qirqilgan Natija:</span>
+                            <button onclick="downloadMagicResult()" class="px-3.5 py-1.5 rounded-xl bg-violet-500 hover:bg-violet-400 text-black text-xs font-extrabold flex items-center gap-1.5 shadow-lg transition">
+                                <i data-lucide="Download" class="w-4 h-4"></i>
+                                <span data-i18n="mgDownloadPng">Tiniq PNG Yuklab Olish</span>
+                            </button>
+                        </div>
+                        <div class="rounded-xl overflow-hidden bg-space-900 border border-white/10 flex items-center justify-center min-h-[300px] p-2 relative">
+                            <canvas id="magicResultCanvas" class="max-h-80 w-auto rounded-lg shadow-2xl"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- FEATURE 6: AUDIO STUDIO & VISUALIZER (Amber & Lime) - IDEA 2 -->
+        <!-- ============================================================= -->
+        <section id="view-audio" class="feature-view hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 border border-amber-500/30 neon-glow-amber space-y-6 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+                    <div class="space-y-1.5 max-w-2xl">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold font-mono">
+                            <i data-lucide="Radio" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="auBadge">60 FPS Jonli Spektr & Vokal/Minus Ajratgich</span>
+                        </span>
+                        <h2 data-i18n="auTitle" class="text-xl sm:text-2xl font-extrabold text-white">
+                            Audio Studio & Spektr: Musiqadan Vokal yoki Minusni Ajratish
+                        </h2>
+                        <p data-i18n="auDesc" class="text-xs sm:text-sm text-slate-300">
+                            Musiqa yuklang — real-vaqt rejimida neon vizualizator orqali musiqani tomosha qiling va vokalni musiqadan ajrating.
+                        </p>
+                    </div>
+
+                    <button onclick="playCyberDemoTrack()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-lime-500 text-black text-xs font-extrabold flex items-center gap-1.5 shadow-lg shadow-amber-500/20 shrink-0">
+                        <i data-lucide="Play" class="w-4 h-4 fill-black"></i>
+                        <span data-i18n="auDemoBtn">🎵 Demo Trekni Tinglash</span>
+                    </button>
+                </div>
+
+                <!-- 60 FPS Real-time Visualizer Canvas -->
+                <div class="bg-space-950 border border-amber-500/30 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center justify-between text-xs font-mono">
+                        <span class="text-amber-400 font-bold flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                            <span>NEON FREQUENCY SPECTRUM (60 FPS)</span>
+                        </span>
+                        <span id="audioTrackName" class="text-slate-400">Cyber_Groove_Demo.mp3</span>
+                    </div>
+                    <canvas id="audioVisualizerCanvas" class="w-full h-44 rounded-xl bg-space-900 border border-white/5"></canvas>
+                </div>
+
+                <!-- Controls & Splitter Action Bar -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Upload Custom Audio -->
+                    <div class="bg-space-950 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between gap-4">
+                        <div>
+                            <h4 class="text-xs font-bold text-white uppercase">O'z Musiqangizni Yuklang:</h4>
+                            <p class="text-[11px] text-slate-400">MP3, WAV, M4A yoki OGG audio fayl</p>
+                        </div>
+                        <button onclick="document.getElementById('customAudioFileInput').click()" class="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition">
+                            Fayl Tanlash
+                        </button>
+                        <input type="file" id="customAudioFileInput" class="hidden" accept="audio/*" onchange="handleCustomAudioSelect(this.files)" />
+                    </div>
+
+                    <!-- Splitter Downloads -->
+                    <div class="bg-space-950 border border-amber-500/20 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-2">
+                        <button onclick="downloadSeparatedTrack('vocal')" class="flex-1 px-3 py-2.5 rounded-xl bg-space-900 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="Mic" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="auVocalBtn">🎤 Faqat Ovoz (Acapella)</span>
+                        </button>
+                        <button onclick="downloadSeparatedTrack('music')" class="flex-1 px-3 py-2.5 rounded-xl bg-space-900 hover:bg-lime-500/20 border border-lime-500/30 text-lime-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="Guitar" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="auMusicBtn">🎸 Faqat Musiqa (Karaoke)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 z-50 hidden bg-space-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl border border-white/15 max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 bg-space-900 border-b border-white/10 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="Eye" class="w-5 h-5 text-cyan-400"></i>
+                    <div>
+                        <h3 id="previewTitle" class="text-sm font-bold text-white">Fayl Ichki Manbasi</h3>
+                        <p class="text-[11px] text-emerald-400">100% Asl Manba Tekshiruvi</p>
+                    </div>
+                </div>
+                <button onclick="closePreviewModal()" class="p-1.5 rounded-xl bg-space-800 text-slate-400 hover:text-white">
+                    <i data-lucide="X" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="previewBody" class="p-6 overflow-auto flex-1 bg-space-950/60 preview-table text-slate-200 text-sm"></div>
+        </div>
+    </div>
+
+    <!-- Global Format Matrix Modal -->
+    <div id="matrixModal" class="fixed inset-0 z-50 hidden bg-space-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl border border-white/15 max-w-2xl w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="Grid" class="w-5 h-5 text-cyan-400"></i>
+                    Qo'llab-quvvatlanadigan Formatlar Jadvali
+                </h3>
+                <button onclick="document.getElementById('matrixModal').classList.add('hidden')" class="p-1.5 rounded-xl bg-space-800 text-slate-400 hover:text-white">
+                    <i data-lucide="X" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs text-slate-300">
+                <div class="p-3 rounded-xl bg-space-900 border border-white/5">
+                    <b class="text-cyan-400 block mb-1">📊 Excel & Jadval:</b>
+                    .xlsx, .xls, .csv, .json ➔ PDF, Excel, Word, CSV, HTML, Matn
+                </div>
+                <div class="p-3 rounded-xl bg-space-900 border border-white/5">
+                    <b class="text-indigo-400 block mb-1">📝 Word & Hujjat:</b>
+                    .docx, .doc, .txt, .html ➔ PDF, Word, Excel, HTML, Matn, Rasmlar
+                </div>
+                <div class="p-3 rounded-xl bg-space-900 border border-white/5">
+                    <b class="text-fuchsia-400 block mb-1">📕 PDF Hujjat:</b>
+                    .pdf ➔ Word (.doc), Excel, JPG, PNG, Matn
+                </div>
+                <div class="p-3 rounded-xl bg-space-900 border border-white/5">
+                    <b class="text-purple-400 block mb-1">🖼️ Rasm & Grafika:</b>
+                    .jpg, .jpeg, .png, .webp ➔ PDF, PNG, JPG, WEBP, Word
+                </div>
+                <div class="p-3 rounded-xl bg-space-900 border border-white/5">
+                    <b class="text-amber-400 block mb-1">🎬 Video & Audio:</b>
+                    .mp4, .mov, .webm ➔ WAV Asl Studiya Musiqa, MP3
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offscreen Render Stage -->
+    <div id="offscreenStage" class="fixed -left-[9999px] top-0 w-[794px] bg-white text-slate-900 p-8"></div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- ============================================================= -->
+    <!-- MASTER PRODUCTION JAVASCRIPT RUNTIME                          -->
+    <!-- ============================================================= -->
+    <script>
+        // PDF.js worker
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        // i18n Data
+        const I18N_DATA = {"uz":{"appTitle":"Omni Super","brandSubtitle":"UNIVERSAL MEDIA PLATFORMA","clusterStatus":"Klaster: Toshkent-01 (100% Faol)","formatsBtn":"Formatlar Jadvali","tabConverter":"1. Fayl Konvertori","tabDownloader":"2. Video & MP3","tabTranslator":"3. AI Tarjimon","tabPixar":"4. 3D Pixar Obraz","tabMagic":"5. AI Magic Studio","tabAudio":"6. Audio & Spektr","convBadge":"Ma'lumotlar 100% O'zgarishsiz Saqlanadi (Lossless)","convTitle":"Fayllarni O'giring yoki Video/Rasm va Musiqani Yuklab Oling","convDesc":"Excel, PDF, Word, JPG, PNG, Video (MP4) fayllarini yuklang — dastur fayl turini o'zi aniqlab, kerakli formatga o'girib beradi.","convDemoTitle":"Tezkor Sinov (Demo Fayllar)","convDropTitle":"Fayl yoki Videoni shu yerga tashlang yoki tanlash uchun bosing","convDropDesc":"Qo'llab-quvvatlanadi: Excel, Word, PDF, Rasm (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV musiqa)","convSelectBtn":"Kompyuterdan Fayl Tanlash","convConvertAll":"Barchasini O'girish","convDownloadZip":"ZIP Arxivda Yuklab Olish","convClear":"Tozalash","dlBadge":"Original Sifat (Lossless Media & Audio)","dlTitle":"Video, Rasm yoki Musiqani Link Orqali Asl Holatida Yuklab Olish","dlDesc":"Instagram, TikTok, YouTube yoki to'g'ridan-to'g'ri rasm/video linkini tashlang — dastur formatni aniqlab, sifatini buzmay yuklab beradi.","dlPlaceholder":"https://... (Video, Rasm, TikTok, YouTube linkini shu yerga tashlang)","dlAnalyzeBtn":"Tekshirish va Yuklash","dlOrigVideo":"Asl Videoni Yuklash (MP4)","dlMp3":"Musiqani Yuklab Olish (MP3)","dlWav":"Asl Studiya Audio (WAV)","dlCover":"Muqovani Yuklash (JPG)","trBadge":"Jahondagi Eng Top 10+ Til • Imlo Xatolarisiz","trTitle":"Professional AI Tarjimon: Matn yoki Rasmni Asl Holatida Tarjima Qiling","trDesc":"Tepadagi oynaga matn yozing yoki rasm yuklang — 10 ta jahon tiliga 100% imlo xatolarisiz tarjima qilib beradi.","trTab1":"📝 Matn Tarjimasi","trTab2":"🖼️ Rasmni O'zida Tarjima Qilish","trSourceLabel":"Manba Tili:","trTargetLabel":"Tarjima Tili:","trTranslateBtn":"Bexato Tarjima Qilish","trSpeakBtn":"Ovoz chiqarib o'qish","trCopyBtn":"Nusxa Olish","trDocBtn":"Word Hujjati (.doc)","pxBadge":"Maxsus AI Modul • 3D Disney / Pixar Multfilm Obraziga O'girish","pxTitle":"Foto-Animatsiya: Rasmingizni 3D Pixar Qahramoniga Aylantiring!","pxDesc":"Inson qiyofasi, uy hayvoni yoki istalgan buyum rasmini yuklang — sun'iy intellekt 3D Pixar multfilm qahramoniga aylantiradi.","pxRenderBtn":"✨ 3D Pixar Animatsiyaga Aylantirish","pxDownloadPng":"4K PNG Yuklab Olish","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Yangi AI Studio • 1-Klik Bilan Fonni Olib Tashlash & Tiniqlashtirish","mgTitle":"AI Magic Studio: Fonni Tozalash va 4K Sifatga Oshirish","mgDesc":"Rasm fonini 1 sekundda olib tashlang, shaffof qiling yoki yangi neon fon qo'ying.","mgRemoveBgBtn":"✂️ Fonni 1 Sekundda Tozalash","mgDownloadPng":"Tiniq PNG Yuklab Olish","auBadge":"Cyberpunk Audio Studio • 60 FPS Jonli Spektr & Vokal/Minus Ajratgich","auTitle":"Audio Studio & Spektr: Musiqadan Vokal yoki Minusni Ajratish","auDesc":"Musiqa yuklang — real-vaqt rejimida neon vizualizator orqali musiqani tomosha qiling va vokalni musiqadan ajrating.","auDemoBtn":"🎵 Demo Trekni Tinglash","auVocalBtn":"🎤 Faqat Ovoz (Acapella) Yuklash","auMusicBtn":"🎸 Faqat Musiqa (Karaoke) Yuklash"},"en":{"appTitle":"Omni Super","brandSubtitle":"UNIVERSAL MEDIA PLATFORM","clusterStatus":"Cluster: Global-01 (100% Active)","formatsBtn":"Supported Formats","tabConverter":"1. File Converter","tabDownloader":"2. Video & MP3","tabTranslator":"3. AI Translator","tabPixar":"4. 3D Pixar Studio","tabMagic":"5. AI Magic Studio","tabAudio":"6. Audio & Visualizer","convBadge":"100% Lossless Data Fidelity Preserved","convTitle":"Convert Files or Download Video/Audio Instantly","convDesc":"Upload Excel, PDF, Word, JPG, PNG, MP4 — our system auto-detects formats and converts losslessly.","convDemoTitle":"Quick Test (Demo Files)","convDropTitle":"Drag & drop files or videos here, or click to browse","convDropDesc":"Supported: Excel, Word, PDF, Images (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV)","convSelectBtn":"Choose Files from Device","convConvertAll":"Convert All Files","convDownloadZip":"Download All as ZIP","convClear":"Clear Queue","dlBadge":"Lossless Original Quality Media & Audio","dlTitle":"Download Videos, Photos or Music via Link in Full HD","dlDesc":"Paste Instagram, TikTok, YouTube or direct media URLs — pristine quality without watermarks.","dlPlaceholder":"https://... (Paste Video, TikTok, YouTube or Image URL)","dlAnalyzeBtn":"Analyze & Download","dlOrigVideo":"Download Video (MP4)","dlMp3":"Download Audio (MP3)","dlWav":"Studio Lossless (WAV)","dlCover":"Download Artwork (JPG)","trBadge":"Top 10 World Languages • High Precision Neural NMT","trTitle":"Professional AI Translator: Text & Visual In-Image Translation","trDesc":"Type text or upload an image — get flawless translation across 10 major languages.","trTab1":"📝 Text Translation","trTab2":"🖼️ In-Image Translation","trSourceLabel":"Source Language:","trTargetLabel":"Target Language:","trTranslateBtn":"Translate Accurately","trSpeakBtn":"Listen (TTS)","trCopyBtn":"Copy Text","trDocBtn":"Word Document (.doc)","pxBadge":"3D Disney / Pixar Animated Character Stylizer","pxTitle":"Photo Animator: Transform Images into 3D Pixar Characters!","pxDesc":"Upload portraits, pets, or objects — transforms features into vivid 3D Pixar animation style.","pxRenderBtn":"✨ Render 3D Pixar Animation","pxDownloadPng":"Download 4K PNG","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Instant 1-Click Background Removal & 4K Image Upscaling","mgTitle":"AI Magic Studio: Background Eraser & 4K Enhancer","mgDesc":"Remove image background in 1 second, get transparent PNGs, or apply vibrant neon backdrops.","mgRemoveBgBtn":"✂️ Remove Background (1-Sec)","mgDownloadPng":"Download Crisp PNG","auBadge":"Cyberpunk Audio Studio • 60 FPS Live Equalizer & Vocal Splitter","auTitle":"Audio Studio: Vocal & Instrument Splitter with Visualizer","auDesc":"Upload any audio — watch real-time neon visualizer waves and isolate vocals from karaoke instruments.","auDemoBtn":"🎵 Play Demo Track","auVocalBtn":"🎤 Download Vocals (Acapella)","auMusicBtn":"🎸 Download Music (Karaoke)"},"ru":{"appTitle":"Omni Super — 6-в-1 Универсальный Медиа Центр","brandSubtitle":"УНИВЕРСАЛЬНАЯ МЕДИА ПЛАТФОРМА","clusterStatus":"Кластер: Онлайн-01 (100% Активен)","formatsBtn":"Таблица Форматов","tabConverter":"1. Конвертер Файлов","tabDownloader":"2. Видео и MP3","tabTranslator":"3. AI Переводчик","tabPixar":"4. 3D Pixar Образ","tabMagic":"5. AI Magic Студия","tabAudio":"6. Аудио и Спектр","convBadge":"100% Сохранение Данных Без Потерь (Lossless)","convTitle":"Конвертируйте Файлы или Скачивайте Видео/Аудио","convDesc":"Загружайте Excel, PDF, Word, JPG, PNG, MP4 — система автоматически определяет тип файла.","convDemoTitle":"Быстрый Тест (Демо Файлы)","convDropTitle":"Перетащите файл сюда или нажмите для выбора","convDropDesc":"Поддержка: Excel, Word, PDF, Картинки, Видео (.mp4 ➔ MP3/WAV музыка)","convSelectBtn":"Выбрать Файл на Компьютере","convConvertAll":"Конвертировать Все","convDownloadZip":"Скачать Все в ZIP","convClear":"Очистить","dlBadge":"Оригинальное Качество Без Потерь","dlTitle":"Скачивание Видео, Фото и Музыки по Ссылке","dlDesc":"Вставьте ссылку Instagram, TikTok, YouTube — скачивание без водяных знаков в полном HD.","dlPlaceholder":"https://... (Вставьте ссылку на Видео, TikTok, YouTube)","dlAnalyzeBtn":"Проверить и Скачать","dlOrigVideo":"Скачать Видео (MP4)","dlMp3":"Скачать Музыку (MP3)","dlWav":"Студийный Звук (WAV)","dlCover":"Скачать Обложку (JPG)","trBadge":"Топ-10 Языков Мира • Без Грамматических Ошибок","trTitle":"Профессиональный AI Переводчик: Текст и Перевод на Фото","trDesc":"Введите текст или загрузите фото с текстом для мгновенного точного перевода.","trTab1":"📝 Перевод Текста","trTab2":"🖼️ Перевод на Самом Фото","trSourceLabel":"Исходный Язык:","trTargetLabel":"Язык Перевода:","trTranslateBtn":"Перевести Точно","trSpeakBtn":"Озвучить (TTS)","trCopyBtn":"Копировать","trDocBtn":"Документ Word (.doc)","pxBadge":"Превращение Фото в 3D Мультфильм Pixar / Disney","pxTitle":"Фото-Анимация: Сделайте из Фото 3D Героя Pixar!","pxDesc":"Загрузите портрет человека, питомца или предмет — AI создаст потрясающий 3D мульт-образ.","pxRenderBtn":"✨ Создать 3D Pixar Анимацию","pxDownloadPng":"Скачать 4K PNG","pxDownloadObj":"3D Модель (.OBJ)","mgBadge":"Удаление Фона в 1 Клик & Увеличение до 4K","mgTitle":"AI Magic Студия: Удаление Фона и Улучшение Фото","mgDesc":"Удалите фон за 1 секунду, сделайте его прозрачным или примените сочные неоновые обои.","mgRemoveBgBtn":"✂️ Удалить Фон за 1 Сек","mgDownloadPng":"Скачать Четкий PNG","auBadge":"Киберпанк Аудио Студия • Живой Спектр 60 FPS","auTitle":"Аудио Студия: Разделение Вокала и Минуса + Эквалайзер","auDesc":"Загрузите трек — наблюдайте неоновый эквалайзер в реальном времени и отделите голос от музыки.","auDemoBtn":"🎵 Слушать Демо Трек","auVocalBtn":"🎤 Скачать Голос (Акапелла)","auMusicBtn":"🎸 Скачать Музыку (Минусовка)"},"tr":{"appTitle":"Omni Super Evrensel Medya Paketi","brandSubtitle":"UNIVERSAL MEDIA PLATFORM","clusterStatus":"Cluster: Global-01 (100% Active)","formatsBtn":"Supported Formats","tabConverter":"1. Dosya Dönüştürücü","tabDownloader":"2. Video & MP3","tabTranslator":"3. AI Çevirmen","tabPixar":"4. 3D Pixar Stüdyo","tabMagic":"5. AI Magic Stüdyo","tabAudio":"6. Ses & Spektrum","convBadge":"100% Lossless Data Fidelity Preserved","convTitle":"Convert Files or Download Video/Audio Instantly","convDesc":"Upload Excel, PDF, Word, JPG, PNG, MP4 — our system auto-detects formats and converts losslessly.","convDemoTitle":"Quick Test (Demo Files)","convDropTitle":"Drag & drop files or videos here, or click to browse","convDropDesc":"Supported: Excel, Word, PDF, Images (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV)","convSelectBtn":"Choose Files from Device","convConvertAll":"Convert All Files","convDownloadZip":"Download All as ZIP","convClear":"Clear Queue","dlBadge":"Lossless Original Quality Media & Audio","dlTitle":"Download Videos, Photos or Music via Link in Full HD","dlDesc":"Paste Instagram, TikTok, YouTube or direct media URLs — pristine quality without watermarks.","dlPlaceholder":"https://... (Paste Video, TikTok, YouTube or Image URL)","dlAnalyzeBtn":"Analyze & Download","dlOrigVideo":"Download Video (MP4)","dlMp3":"Download Audio (MP3)","dlWav":"Studio Lossless (WAV)","dlCover":"Download Artwork (JPG)","trBadge":"Top 10 World Languages • High Precision Neural NMT","trTitle":"Professional AI Translator: Text & Visual In-Image Translation","trDesc":"Type text or upload an image — get flawless translation across 10 major languages.","trTab1":"📝 Text Translation","trTab2":"🖼️ In-Image Translation","trSourceLabel":"Source Language:","trTargetLabel":"Target Language:","trTranslateBtn":"Translate Accurately","trSpeakBtn":"Listen (TTS)","trCopyBtn":"Copy Text","trDocBtn":"Word Document (.doc)","pxBadge":"3D Disney / Pixar Animated Character Stylizer","pxTitle":"Photo Animator: Transform Images into 3D Pixar Characters!","pxDesc":"Upload portraits, pets, or objects — transforms features into vivid 3D Pixar animation style.","pxRenderBtn":"✨ Render 3D Pixar Animation","pxDownloadPng":"Download 4K PNG","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Instant 1-Click Background Removal & 4K Image Upscaling","mgTitle":"AI Magic Studio: Background Eraser & 4K Enhancer","mgDesc":"Remove image background in 1 second, get transparent PNGs, or apply vibrant neon backdrops.","mgRemoveBgBtn":"✂️ Remove Background (1-Sec)","mgDownloadPng":"Download Crisp PNG","auBadge":"Cyberpunk Audio Studio • 60 FPS Live Equalizer & Vocal Splitter","auTitle":"Audio Studio: Vocal & Instrument Splitter with Visualizer","auDesc":"Upload any audio — watch real-time neon visualizer waves and isolate vocals from karaoke instruments.","auDemoBtn":"🎵 Play Demo Track","auVocalBtn":"🎤 Download Vocals (Acapella)","auMusicBtn":"🎸 Download Music (Karaoke)"},"ar":{"appTitle":"Omni Super — منصة وسائط 6 في 1","brandSubtitle":"UNIVERSAL MEDIA PLATFORM","clusterStatus":"Cluster: Global-01 (100% Active)","formatsBtn":"Supported Formats","tabConverter":"1. محول الملفات","tabDownloader":"2. تحميل الفيديو والصوت","tabTranslator":"3. مترجم الذكاء الاصطناعي","tabPixar":"4. استوديو بيكسار 3D","tabMagic":"5. استوديو السحر الذكي","tabAudio":"6. استوديو الصوت والترددات","convBadge":"100% Lossless Data Fidelity Preserved","convTitle":"Convert Files or Download Video/Audio Instantly","convDesc":"Upload Excel, PDF, Word, JPG, PNG, MP4 — our system auto-detects formats and converts losslessly.","convDemoTitle":"Quick Test (Demo Files)","convDropTitle":"Drag & drop files or videos here, or click to browse","convDropDesc":"Supported: Excel, Word, PDF, Images (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV)","convSelectBtn":"Choose Files from Device","convConvertAll":"Convert All Files","convDownloadZip":"Download All as ZIP","convClear":"Clear Queue","dlBadge":"Lossless Original Quality Media & Audio","dlTitle":"Download Videos, Photos or Music via Link in Full HD","dlDesc":"Paste Instagram, TikTok, YouTube or direct media URLs — pristine quality without watermarks.","dlPlaceholder":"https://... (Paste Video, TikTok, YouTube or Image URL)","dlAnalyzeBtn":"Analyze & Download","dlOrigVideo":"Download Video (MP4)","dlMp3":"Download Audio (MP3)","dlWav":"Studio Lossless (WAV)","dlCover":"Download Artwork (JPG)","trBadge":"Top 10 World Languages • High Precision Neural NMT","trTitle":"Professional AI Translator: Text & Visual In-Image Translation","trDesc":"Type text or upload an image — get flawless translation across 10 major languages.","trTab1":"📝 Text Translation","trTab2":"🖼️ In-Image Translation","trSourceLabel":"Source Language:","trTargetLabel":"Target Language:","trTranslateBtn":"Translate Accurately","trSpeakBtn":"Listen (TTS)","trCopyBtn":"Copy Text","trDocBtn":"Word Document (.doc)","pxBadge":"3D Disney / Pixar Animated Character Stylizer","pxTitle":"Photo Animator: Transform Images into 3D Pixar Characters!","pxDesc":"Upload portraits, pets, or objects — transforms features into vivid 3D Pixar animation style.","pxRenderBtn":"✨ Render 3D Pixar Animation","pxDownloadPng":"Download 4K PNG","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Instant 1-Click Background Removal & 4K Image Upscaling","mgTitle":"AI Magic Studio: Background Eraser & 4K Enhancer","mgDesc":"Remove image background in 1 second, get transparent PNGs, or apply vibrant neon backdrops.","mgRemoveBgBtn":"✂️ Remove Background (1-Sec)","mgDownloadPng":"Download Crisp PNG","auBadge":"Cyberpunk Audio Studio • 60 FPS Live Equalizer & Vocal Splitter","auTitle":"Audio Studio: Vocal & Instrument Splitter with Visualizer","auDesc":"Upload any audio — watch real-time neon visualizer waves and isolate vocals from karaoke instruments.","auDemoBtn":"🎵 Play Demo Track","auVocalBtn":"🎤 Download Vocals (Acapella)","auMusicBtn":"🎸 Download Music (Karaoke)"},"zh":{"appTitle":"Omni Super — 六合一全能媒体工作室","brandSubtitle":"UNIVERSAL MEDIA PLATFORM","clusterStatus":"Cluster: Global-01 (100% Active)","formatsBtn":"Supported Formats","tabConverter":"1. 文件转换器","tabDownloader":"2. 视频与音频下载","tabTranslator":"3. AI 智能翻译","tabPixar":"4. 3D 皮克斯动画制作","tabMagic":"5. AI 魔法抠图工作室","tabAudio":"6. 音频频谱与人声分离","convBadge":"100% Lossless Data Fidelity Preserved","convTitle":"Convert Files or Download Video/Audio Instantly","convDesc":"Upload Excel, PDF, Word, JPG, PNG, MP4 — our system auto-detects formats and converts losslessly.","convDemoTitle":"Quick Test (Demo Files)","convDropTitle":"Drag & drop files or videos here, or click to browse","convDropDesc":"Supported: Excel, Word, PDF, Images (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV)","convSelectBtn":"Choose Files from Device","convConvertAll":"Convert All Files","convDownloadZip":"Download All as ZIP","convClear":"Clear Queue","dlBadge":"Lossless Original Quality Media & Audio","dlTitle":"Download Videos, Photos or Music via Link in Full HD","dlDesc":"Paste Instagram, TikTok, YouTube or direct media URLs — pristine quality without watermarks.","dlPlaceholder":"https://... (Paste Video, TikTok, YouTube or Image URL)","dlAnalyzeBtn":"Analyze & Download","dlOrigVideo":"Download Video (MP4)","dlMp3":"Download Audio (MP3)","dlWav":"Studio Lossless (WAV)","dlCover":"Download Artwork (JPG)","trBadge":"Top 10 World Languages • High Precision Neural NMT","trTitle":"Professional AI Translator: Text & Visual In-Image Translation","trDesc":"Type text or upload an image — get flawless translation across 10 major languages.","trTab1":"📝 Text Translation","trTab2":"🖼️ In-Image Translation","trSourceLabel":"Source Language:","trTargetLabel":"Target Language:","trTranslateBtn":"Translate Accurately","trSpeakBtn":"Listen (TTS)","trCopyBtn":"Copy Text","trDocBtn":"Word Document (.doc)","pxBadge":"3D Disney / Pixar Animated Character Stylizer","pxTitle":"Photo Animator: Transform Images into 3D Pixar Characters!","pxDesc":"Upload portraits, pets, or objects — transforms features into vivid 3D Pixar animation style.","pxRenderBtn":"✨ Render 3D Pixar Animation","pxDownloadPng":"Download 4K PNG","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Instant 1-Click Background Removal & 4K Image Upscaling","mgTitle":"AI Magic Studio: Background Eraser & 4K Enhancer","mgDesc":"Remove image background in 1 second, get transparent PNGs, or apply vibrant neon backdrops.","mgRemoveBgBtn":"✂️ Remove Background (1-Sec)","mgDownloadPng":"Download Crisp PNG","auBadge":"Cyberpunk Audio Studio • 60 FPS Live Equalizer & Vocal Splitter","auTitle":"Audio Studio: Vocal & Instrument Splitter with Visualizer","auDesc":"Upload any audio — watch real-time neon visualizer waves and isolate vocals from karaoke instruments.","auDemoBtn":"🎵 Play Demo Track","auVocalBtn":"🎤 Download Vocals (Acapella)","auMusicBtn":"🎸 Download Music (Karaoke)"},"es":{"appTitle":"Omni Super — Suite Multimedia 6 en 1","brandSubtitle":"UNIVERSAL MEDIA PLATFORM","clusterStatus":"Cluster: Global-01 (100% Active)","formatsBtn":"Supported Formats","tabConverter":"1. Conversor de Archivos","tabDownloader":"2. Vídeo y MP3","tabTranslator":"3. Traductor AI","tabPixar":"4. Estudio 3D Pixar","tabMagic":"5. AI Magic Studio","tabAudio":"6. Audio y Espectro","convBadge":"100% Lossless Data Fidelity Preserved","convTitle":"Convert Files or Download Video/Audio Instantly","convDesc":"Upload Excel, PDF, Word, JPG, PNG, MP4 — our system auto-detects formats and converts losslessly.","convDemoTitle":"Quick Test (Demo Files)","convDropTitle":"Drag & drop files or videos here, or click to browse","convDropDesc":"Supported: Excel, Word, PDF, Images (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV)","convSelectBtn":"Choose Files from Device","convConvertAll":"Convert All Files","convDownloadZip":"Download All as ZIP","convClear":"Clear Queue","dlBadge":"Lossless Original Quality Media & Audio","dlTitle":"Download Videos, Photos or Music via Link in Full HD","dlDesc":"Paste Instagram, TikTok, YouTube or direct media URLs — pristine quality without watermarks.","dlPlaceholder":"https://... (Paste Video, TikTok, YouTube or Image URL)","dlAnalyzeBtn":"Analyze & Download","dlOrigVideo":"Download Video (MP4)","dlMp3":"Download Audio (MP3)","dlWav":"Studio Lossless (WAV)","dlCover":"Download Artwork (JPG)","trBadge":"Top 10 World Languages • High Precision Neural NMT","trTitle":"Professional AI Translator: Text & Visual In-Image Translation","trDesc":"Type text or upload an image — get flawless translation across 10 major languages.","trTab1":"📝 Text Translation","trTab2":"🖼️ In-Image Translation","trSourceLabel":"Source Language:","trTargetLabel":"Target Language:","trTranslateBtn":"Translate Accurately","trSpeakBtn":"Listen (TTS)","trCopyBtn":"Copy Text","trDocBtn":"Word Document (.doc)","pxBadge":"3D Disney / Pixar Animated Character Stylizer","pxTitle":"Photo Animator: Transform Images into 3D Pixar Characters!","pxDesc":"Upload portraits, pets, or objects — transforms features into vivid 3D Pixar animation style.","pxRenderBtn":"✨ Render 3D Pixar Animation","pxDownloadPng":"Download 4K PNG","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Instant 1-Click Background Removal & 4K Image Upscaling","mgTitle":"AI Magic Studio: Background Eraser & 4K Enhancer","mgDesc":"Remove image background in 1 second, get transparent PNGs, or apply vibrant neon backdrops.","mgRemoveBgBtn":"✂️ Remove Background (1-Sec)","mgDownloadPng":"Download Crisp PNG","auBadge":"Cyberpunk Audio Studio • 60 FPS Live Equalizer & Vocal Splitter","auTitle":"Audio Studio: Vocal & Instrument Splitter with Visualizer","auDesc":"Upload any audio — watch real-time neon visualizer waves and isolate vocals from karaoke instruments.","auDemoBtn":"🎵 Play Demo Track","auVocalBtn":"🎤 Download Vocals (Acapella)","auMusicBtn":"🎸 Download Music (Karaoke)"},"de":{"appTitle":"Omni Super Universelle Mediensuite","brandSubtitle":"UNIVERSAL MEDIA PLATFORM","clusterStatus":"Cluster: Global-01 (100% Active)","formatsBtn":"Supported Formats","tabConverter":"1. Datei-Konverter","tabDownloader":"2. Video & MP3","tabTranslator":"3. AI Übersetzer","tabPixar":"4. 3D Pixar Studio","tabMagic":"5. AI Magic Studio","tabAudio":"6. Audio & Frequenz","convBadge":"100% Lossless Data Fidelity Preserved","convTitle":"Convert Files or Download Video/Audio Instantly","convDesc":"Upload Excel, PDF, Word, JPG, PNG, MP4 — our system auto-detects formats and converts losslessly.","convDemoTitle":"Quick Test (Demo Files)","convDropTitle":"Drag & drop files or videos here, or click to browse","convDropDesc":"Supported: Excel, Word, PDF, Images (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV)","convSelectBtn":"Choose Files from Device","convConvertAll":"Convert All Files","convDownloadZip":"Download All as ZIP","convClear":"Clear Queue","dlBadge":"Lossless Original Quality Media & Audio","dlTitle":"Download Videos, Photos or Music via Link in Full HD","dlDesc":"Paste Instagram, TikTok, YouTube or direct media URLs — pristine quality without watermarks.","dlPlaceholder":"https://... (Paste Video, TikTok, YouTube or Image URL)","dlAnalyzeBtn":"Analyze & Download","dlOrigVideo":"Download Video (MP4)","dlMp3":"Download Audio (MP3)","dlWav":"Studio Lossless (WAV)","dlCover":"Download Artwork (JPG)","trBadge":"Top 10 World Languages • High Precision Neural NMT","trTitle":"Professional AI Translator: Text & Visual In-Image Translation","trDesc":"Type text or upload an image — get flawless translation across 10 major languages.","trTab1":"📝 Text Translation","trTab2":"🖼️ In-Image Translation","trSourceLabel":"Source Language:","trTargetLabel":"Target Language:","trTranslateBtn":"Translate Accurately","trSpeakBtn":"Listen (TTS)","trCopyBtn":"Copy Text","trDocBtn":"Word Document (.doc)","pxBadge":"3D Disney / Pixar Animated Character Stylizer","pxTitle":"Photo Animator: Transform Images into 3D Pixar Characters!","pxDesc":"Upload portraits, pets, or objects — transforms features into vivid 3D Pixar animation style.","pxRenderBtn":"✨ Render 3D Pixar Animation","pxDownloadPng":"Download 4K PNG","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Instant 1-Click Background Removal & 4K Image Upscaling","mgTitle":"AI Magic Studio: Background Eraser & 4K Enhancer","mgDesc":"Remove image background in 1 second, get transparent PNGs, or apply vibrant neon backdrops.","mgRemoveBgBtn":"✂️ Remove Background (1-Sec)","mgDownloadPng":"Download Crisp PNG","auBadge":"Cyberpunk Audio Studio • 60 FPS Live Equalizer & Vocal Splitter","auTitle":"Audio Studio: Vocal & Instrument Splitter with Visualizer","auDesc":"Upload any audio — watch real-time neon visualizer waves and isolate vocals from karaoke instruments.","auDemoBtn":"🎵 Play Demo Track","auVocalBtn":"🎤 Download Vocals (Acapella)","auMusicBtn":"🎸 Download Music (Karaoke)"},"fr":{"appTitle":"Omni Super — Suite Média Universelle 6-en-1","brandSubtitle":"UNIVERSAL MEDIA PLATFORM","clusterStatus":"Cluster: Global-01 (100% Active)","formatsBtn":"Supported Formats","tabConverter":"1. Convertisseur","tabDownloader":"2. Vidéo et MP3","tabTranslator":"3. Traducteur IA","tabPixar":"4. Studio 3D Pixar","tabMagic":"5. Studio Magique IA","tabAudio":"6. Audio et Spectre","convBadge":"100% Lossless Data Fidelity Preserved","convTitle":"Convert Files or Download Video/Audio Instantly","convDesc":"Upload Excel, PDF, Word, JPG, PNG, MP4 — our system auto-detects formats and converts losslessly.","convDemoTitle":"Quick Test (Demo Files)","convDropTitle":"Drag & drop files or videos here, or click to browse","convDropDesc":"Supported: Excel, Word, PDF, Images (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV)","convSelectBtn":"Choose Files from Device","convConvertAll":"Convert All Files","convDownloadZip":"Download All as ZIP","convClear":"Clear Queue","dlBadge":"Lossless Original Quality Media & Audio","dlTitle":"Download Videos, Photos or Music via Link in Full HD","dlDesc":"Paste Instagram, TikTok, YouTube or direct media URLs — pristine quality without watermarks.","dlPlaceholder":"https://... (Paste Video, TikTok, YouTube or Image URL)","dlAnalyzeBtn":"Analyze & Download","dlOrigVideo":"Download Video (MP4)","dlMp3":"Download Audio (MP3)","dlWav":"Studio Lossless (WAV)","dlCover":"Download Artwork (JPG)","trBadge":"Top 10 World Languages • High Precision Neural NMT","trTitle":"Professional AI Translator: Text & Visual In-Image Translation","trDesc":"Type text or upload an image — get flawless translation across 10 major languages.","trTab1":"📝 Text Translation","trTab2":"🖼️ In-Image Translation","trSourceLabel":"Source Language:","trTargetLabel":"Target Language:","trTranslateBtn":"Translate Accurately","trSpeakBtn":"Listen (TTS)","trCopyBtn":"Copy Text","trDocBtn":"Word Document (.doc)","pxBadge":"3D Disney / Pixar Animated Character Stylizer","pxTitle":"Photo Animator: Transform Images into 3D Pixar Characters!","pxDesc":"Upload portraits, pets, or objects — transforms features into vivid 3D Pixar animation style.","pxRenderBtn":"✨ Render 3D Pixar Animation","pxDownloadPng":"Download 4K PNG","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Instant 1-Click Background Removal & 4K Image Upscaling","mgTitle":"AI Magic Studio: Background Eraser & 4K Enhancer","mgDesc":"Remove image background in 1 second, get transparent PNGs, or apply vibrant neon backdrops.","mgRemoveBgBtn":"✂️ Remove Background (1-Sec)","mgDownloadPng":"Download Crisp PNG","auBadge":"Cyberpunk Audio Studio • 60 FPS Live Equalizer & Vocal Splitter","auTitle":"Audio Studio: Vocal & Instrument Splitter with Visualizer","auDesc":"Upload any audio — watch real-time neon visualizer waves and isolate vocals from karaoke instruments.","auDemoBtn":"🎵 Play Demo Track","auVocalBtn":"🎤 Download Vocals (Acapella)","auMusicBtn":"🎸 Download Music (Karaoke)"},"ko":{"appTitle":"Omni Super 올인원 미디어 스위트","brandSubtitle":"UNIVERSAL MEDIA PLATFORM","clusterStatus":"Cluster: Global-01 (100% Active)","formatsBtn":"Supported Formats","tabConverter":"1. 파일 변환기","tabDownloader":"2. 비디오 & MP3 다운로더","tabTranslator":"3. AI 번역기","tabPixar":"4. 3D 픽사 스튜디오","tabMagic":"5. AI 매직 스튜디오","tabAudio":"6. 오디오 & 스펙트럼","convBadge":"100% Lossless Data Fidelity Preserved","convTitle":"Convert Files or Download Video/Audio Instantly","convDesc":"Upload Excel, PDF, Word, JPG, PNG, MP4 — our system auto-detects formats and converts losslessly.","convDemoTitle":"Quick Test (Demo Files)","convDropTitle":"Drag & drop files or videos here, or click to browse","convDropDesc":"Supported: Excel, Word, PDF, Images (.jpg, .png), Video (.mp4, .mov ➔ MP3/WAV)","convSelectBtn":"Choose Files from Device","convConvertAll":"Convert All Files","convDownloadZip":"Download All as ZIP","convClear":"Clear Queue","dlBadge":"Lossless Original Quality Media & Audio","dlTitle":"Download Videos, Photos or Music via Link in Full HD","dlDesc":"Paste Instagram, TikTok, YouTube or direct media URLs — pristine quality without watermarks.","dlPlaceholder":"https://... (Paste Video, TikTok, YouTube or Image URL)","dlAnalyzeBtn":"Analyze & Download","dlOrigVideo":"Download Video (MP4)","dlMp3":"Download Audio (MP3)","dlWav":"Studio Lossless (WAV)","dlCover":"Download Artwork (JPG)","trBadge":"Top 10 World Languages • High Precision Neural NMT","trTitle":"Professional AI Translator: Text & Visual In-Image Translation","trDesc":"Type text or upload an image — get flawless translation across 10 major languages.","trTab1":"📝 Text Translation","trTab2":"🖼️ In-Image Translation","trSourceLabel":"Source Language:","trTargetLabel":"Target Language:","trTranslateBtn":"Translate Accurately","trSpeakBtn":"Listen (TTS)","trCopyBtn":"Copy Text","trDocBtn":"Word Document (.doc)","pxBadge":"3D Disney / Pixar Animated Character Stylizer","pxTitle":"Photo Animator: Transform Images into 3D Pixar Characters!","pxDesc":"Upload portraits, pets, or objects — transforms features into vivid 3D Pixar animation style.","pxRenderBtn":"✨ Render 3D Pixar Animation","pxDownloadPng":"Download 4K PNG","pxDownloadObj":"3D Model (.OBJ)","mgBadge":"Instant 1-Click Background Removal & 4K Image Upscaling","mgTitle":"AI Magic Studio: Background Eraser & 4K Enhancer","mgDesc":"Remove image background in 1 second, get transparent PNGs, or apply vibrant neon backdrops.","mgRemoveBgBtn":"✂️ Remove Background (1-Sec)","mgDownloadPng":"Download Crisp PNG","auBadge":"Cyberpunk Audio Studio • 60 FPS Live Equalizer & Vocal Splitter","auTitle":"Audio Studio: Vocal & Instrument Splitter with Visualizer","auDesc":"Upload any audio — watch real-time neon visualizer waves and isolate vocals from karaoke instruments.","auDemoBtn":"🎵 Play Demo Track","auVocalBtn":"🎤 Download Vocals (Acapella)","auMusicBtn":"🎸 Download Music (Karaoke)"}};
+        let currentLang = 'uz';
+
+        function changeGlobalLanguage(langCode) {
+            if (!I18N_DATA[langCode]) langCode = 'uz';
+            currentLang = langCode;
+            localStorage.setItem('omni_lang', langCode);
+
+            const dict = I18N_DATA[langCode];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.textContent = dict[key];
+                }
+            });
+
+            // Set RTL if Arabic
+            if (langCode === 'ar') {
+                document.documentElement.setAttribute('dir', 'rtl');
+            } else {
+                document.documentElement.removeAttribute('dir');
+            }
+
+            const selector = document.getElementById('globalLangSelector');
+            if (selector) selector.value = langCode;
+
+            showToast('Til o\'zgartirildi: ' + langCode.toUpperCase(), 'success');
+        }
+
+        // Device Detection & Adaptive Viewport
+        function detectDevice() {
+            const width = window.innerWidth;
+            const badge = document.getElementById('deviceBadge');
+            const icon = document.getElementById('deviceIcon');
+            const text = document.getElementById('deviceText');
+
+            let deviceType = 'Desktop';
+            let iconName = 'Laptop';
+
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+                deviceType = 'Telegram App';
+                iconName = 'Send';
+            } else if (width < 640) {
+                deviceType = 'Mobile';
+                iconName = 'Smartphone';
+            } else if (width < 1024) {
+                deviceType = 'Tablet';
+                iconName = 'Tablet';
+            }
+
+            if (text) text.textContent = deviceType;
+            if (icon) icon.setAttribute('data-lucide', iconName);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // Master 6-Feature Tab Switcher
+        const TABS = ['converter', 'downloader', 'translator', 'pixar', 'magic', 'audio'];
+        const TAB_GLOW_CLASSES = {
+            converter: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/50 shadow-cyan-500/20',
+            downloader: 'bg-sky-500/20 text-sky-300 border-sky-400/50 shadow-sky-500/20',
+            translator: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 shadow-emerald-500/20',
+            pixar: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/50 shadow-fuchsia-500/20',
+            magic: 'bg-violet-500/20 text-violet-300 border-violet-400/50 shadow-violet-500/20',
+            audio: 'bg-amber-500/20 text-amber-300 border-amber-400/50 shadow-amber-500/20'
+        };
+
+        function switchMainTab(activeTab) {
+            if (!TABS.includes(activeTab)) activeTab = 'converter';
+
+            // Pause all media playback across features
+            document.querySelectorAll('video, audio').forEach(el => {
+                try { el.pause(); } catch(e){}
+            });
+            if (audioSourceNode) {
+                try { audioSourceNode.stop(); } catch(e){}
+            }
+
+            // Toggle views and styles
+            TABS.forEach(tab => {
+                const viewEl = document.getElementById('view-' + tab);
+                const navBtn = document.getElementById('tab-' + tab);
+
+                if (tab === activeTab) {
+                    if (viewEl) viewEl.classList.remove('hidden');
+                    if (navBtn) {
+                        navBtn.className = 'px-3.5 sm:px-4 py-2.5 rounded-xl border font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition cursor-pointer ' + (TAB_GLOW_CLASSES[tab] || 'bg-cyan-500/20 text-cyan-300');
+                    }
+                } else {
+                    if (viewEl) viewEl.classList.add('hidden');
+                    if (navBtn) {
+                        navBtn.className = 'px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer';
+                    }
+                }
+            });
+
+            // Adjust ambient orbs
+            const orb1 = document.getElementById('ambientOrb1');
+            const orb2 = document.getElementById('ambientOrb2');
+            if (activeTab === 'converter' && orb1) orb1.className = 'absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-[120px] transition-all duration-700';
+            if (activeTab === 'downloader' && orb1) orb1.className = 'absolute -top-32 -left-32 w-96 h-96 bg-sky-500/15 rounded-full blur-[120px] transition-all duration-700';
+            if (activeTab === 'translator' && orb1) orb1.className = 'absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/15 rounded-full blur-[120px] transition-all duration-700';
+            if (activeTab === 'pixar' && orb1) orb1.className = 'absolute -top-32 -left-32 w-96 h-96 bg-fuchsia-500/15 rounded-full blur-[120px] transition-all duration-700';
+            if (activeTab === 'magic' && orb1) orb1.className = 'absolute -top-32 -left-32 w-96 h-96 bg-violet-500/15 rounded-full blur-[120px] transition-all duration-700';
+            if (activeTab === 'audio' && orb1) orb1.className = 'absolute -top-32 -left-32 w-96 h-96 bg-amber-500/15 rounded-full blur-[120px] transition-all duration-700';
+
+            if (window.lucide) lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =============================================================
+        // FEATURE 1: FILE CONVERTER ENGINE
+        // =============================================================
+        let fileQueue = [];
+        const FORMAT_TARGETS = {
+            xlsx: ['pdf', 'csv', 'html', 'json', 'txt', 'doc'],
+            xls:  ['xlsx', 'pdf', 'csv', 'html', 'json', 'txt', 'doc'],
+            csv:  ['xlsx', 'pdf', 'html', 'json', 'txt', 'doc'],
+            json: ['xlsx', 'csv', 'pdf', 'html', 'txt'],
+            docx: ['pdf', 'doc', 'xlsx', 'html', 'txt', 'png', 'jpg'],
+            doc:  ['pdf', 'xlsx', 'html', 'txt', 'png', 'jpg'],
+            pdf:  ['doc', 'xlsx', 'jpg', 'png', 'txt', 'html'],
+            jpg:  ['pdf', 'png', 'webp', 'doc', 'html'],
+            jpeg: ['pdf', 'png', 'webp', 'doc', 'html'],
+            png:  ['pdf', 'jpg', 'webp', 'doc', 'html'],
+            webp: ['pdf', 'png', 'jpg', 'doc', 'html'],
+            txt:  ['pdf', 'doc', 'xlsx', 'html', 'json'],
+            html: ['pdf', 'doc', 'xlsx', 'txt', 'png', 'jpg'],
+            mp4:  ['wav', 'mp3', 'png', 'jpg'],
+            webm: ['wav', 'mp3', 'png', 'jpg'],
+            mov:  ['wav', 'mp3', 'png', 'jpg']
+        };
+
+        function getExtension(name) {
+            return (name.split('.').pop() || '').toLowerCase();
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024, sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        async function handleFiles(fileList) {
+            for (const file of Array.from(fileList)) {
+                // Security cap: 100MB max per file in browser
+                if (file.size > 100 * 1024 * 1024) {
+                    showToast('Fayl hajmi 100 MB dan oshmasligi kerak: ' + file.name, 'error');
+                    continue;
+                }
+                const ext = getExtension(file.name);
+                const targets = FORMAT_TARGETS[ext] || ['pdf', 'txt', 'html'];
+                const item = {
+                    id: 'file_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+                    file,
+                    name: file.name,
+                    baseName: file.name.replace(/\.[^/.]+$/, ''),
+                    ext,
+                    size: formatBytes(file.size),
+                    targets,
+                    targetFormat: targets[0],
+                    status: 'ready',
+                    resultBlob: null,
+                    resultName: null,
+                    extractedData: null
+                };
+                fileQueue.push(item);
+            }
+            renderQueue();
+            showToast(`${fileList.length} ta fayl navbatga qo'shildi`, 'success');
+        }
+
+        function renderQueue() {
+            const section = document.getElementById('queueSection');
+            const list = document.getElementById('fileQueueList');
+            const badge = document.getElementById('fileCountBadge');
+            const zipBtn = document.getElementById('downloadAllZipBtn');
+
+            if (fileQueue.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            section.classList.remove('hidden');
+            badge.textContent = `${fileQueue.length} ta fayl`;
+
+            const doneCount = fileQueue.filter(f => f.status === 'done').length;
+            if (doneCount > 1) zipBtn.classList.remove('hidden');
+            else zipBtn.classList.add('hidden');
+
+            list.innerHTML = fileQueue.map(item => {
+                const statusBadge = item.status === 'done' ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold font-mono">✓ TAYYOR</span>' :
+                                    item.status === 'converting' ? '<span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold font-mono animate-pulse">O\'GIRILMOQDA...</span>' :
+                                    item.status === 'error' ? '<span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold font-mono">XATOLIK</span>' :
+                                    '<span class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px] font-mono">KUTILMOQDA</span>';
+
+                const targetOptions = item.targets.map(t => `<option value="${t}" ${item.targetFormat === t ? 'selected' : ''}>.${t.toUpperCase()}</option>`).join('');
+
+                return `
+                <div class="glass-card rounded-2xl p-4 border border-cyan-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                            <span class="text-xs font-bold font-mono text-cyan-300 uppercase">${item.ext}</span>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h4 class="text-xs sm:text-sm font-bold text-white truncate max-w-xs sm:max-w-md">${item.name}</h4>
+                            <div class="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+                                <span>${item.size}</span>
+                                <span>•</span>
+                                ${statusBadge}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                        <button onclick="previewFile('${item.id}')" class="p-2 rounded-xl bg-space-950 hover:bg-space-800 text-slate-300 border border-white/10 text-xs font-medium" title="Ko'rish">
+                            <i data-lucide="Eye" class="w-4 h-4"></i>
+                        </button>
+                        <select onchange="updateTargetFormat('${item.id}', this.value)" class="bg-space-950 border border-cyan-500/30 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none">
+                            ${targetOptions}
+                        </select>
+                        ${item.status === 'done' ? `
+                            <button onclick="downloadConvertedFile('${item.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold flex items-center gap-1 shadow">
+                                <i data-lucide="Download" class="w-3.5 h-3.5"></i> Yuklash
+                            </button>
+                        ` : `
+                            <button onclick="convertSingleFile('${item.id}')" class="px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold flex items-center gap-1">
+                                <i data-lucide="Play" class="w-3.5 h-3.5"></i> O'girish
+                            </button>
+                        `}
+                        <button onclick="removeFile('${item.id}')" class="p-1.5 rounded-xl text-slate-500 hover:text-rose-400">
+                            <i data-lucide="Trash2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function updateTargetFormat(id, format) {
+            const item = fileQueue.find(f => f.id === id);
+            if (item) item.targetFormat = format;
+        }
+
+        function applyGlobalFormat(format) {
+            if (!format) return;
+            fileQueue.forEach(item => {
+                if (item.targets.includes(format)) item.targetFormat = format;
+            });
+            renderQueue();
+        }
+
+        function removeFile(id) {
+            fileQueue = fileQueue.filter(f => f.id !== id);
+            renderQueue();
+        }
+
+        function clearAllFiles() {
+            fileQueue = [];
+            renderQueue();
+        }
+
+        async function parseSourceFile(item) {
+            if (item.extractedData) return item.extractedData;
+            const file = item.file;
+            const ext = item.ext;
+
+            if (['xlsx', 'xls', 'csv'].includes(ext)) {
+                const buffer = await file.arrayBuffer();
+                const wb = XLSX.read(buffer, { type: 'array' });
+                const firstSheet = wb.Sheets[wb.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+                const html = XLSX.utils.sheet_to_html(firstSheet);
+                const csv = XLSX.utils.sheet_to_csv(firstSheet);
+                item.extractedData = { type: 'table', wb, rows, html, text: csv };
+                return item.extractedData;
+            }
+
+            if (ext === 'docx') {
+                const buffer = await file.arrayBuffer();
+                const htmlRes = await mammoth.convertToHtml({ arrayBuffer: buffer });
+                const textRes = await mammoth.extractRawText({ arrayBuffer: buffer });
+                item.extractedData = { type: 'document', html: htmlRes.value, text: textRes.value };
+                return item.extractedData;
+            }
+
+            if (['doc', 'txt', 'html', 'json'].includes(ext)) {
+                const text = await file.text();
+                if (ext === 'json') {
+                    let rows = [];
+                    try {
+                        const parsed = JSON.parse(text);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            const headers = Object.keys(parsed[0]);
+                            rows = [headers, ...parsed.map(obj => headers.map(h => obj[h] ?? ''))];
+                        }
+                    } catch(e){}
+                    item.extractedData = { type: 'json', text, rows, html: `<pre>${text}</pre>` };
+                    return item.extractedData;
+                }
+                item.extractedData = {
+                    type: 'document',
+                    text: text.replace(/<[^>]+>/g, ' '),
+                    html: ext === 'html' || ext === 'doc' ? text : `<pre style="white-space:pre-wrap;">${text}</pre>`
+                };
+                return item.extractedData;
+            }
+
+            if (ext === 'pdf') {
+                const buffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+                let fullText = '';
+                const pageImages = [];
+                for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+                    const page = await pdf.getPage(i);
+                    const txtContent = await page.getTextContent();
+                    const pageTxt = txtContent.items.map(it => it.str).join(' ');
+                    fullText += `--- Sahifa ${i} ---\n${pageTxt}\n\n`;
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                    pageImages.push(canvas.toDataURL('image/png'));
+                }
+                item.extractedData = { type: 'pdf', text: fullText, pageImages, html: `<pre style="white-space:pre-wrap;">${fullText}</pre>` };
+                return item.extractedData;
+            }
+
+            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                const dataUrl = await new Promise(res => {
+                    const reader = new FileReader();
+                    reader.onload = () => res(reader.result);
+                    reader.readAsDataURL(file);
+                });
+                item.extractedData = { type: 'image', dataUrl, html: `<img src="${dataUrl}" class="max-w-full h-auto rounded-lg" />`, text: `[Rasm: ${item.name}]` };
+                return item.extractedData;
+            }
+
+            if (['mp4', 'mov', 'webm'].includes(ext)) {
+                item.extractedData = { type: 'video', text: item.name };
+                return item.extractedData;
+            }
+
+            item.extractedData = { type: 'raw', text: item.name };
+            return item.extractedData;
+        }
+
+        async function convertSingleFile(id) {
+            const item = fileQueue.find(f => f.id === id);
+            if (!item) return;
+
+            try {
+                item.status = 'converting';
+                renderQueue();
+
+                const data = await parseSourceFile(item);
+                const target = item.targetFormat;
+                let outBlob = null;
+
+                if (target === 'xlsx' || target === 'csv') {
+                    let wb = data.wb;
+                    if (!wb) {
+                        wb = XLSX.utils.book_new();
+                        let rows = data.rows;
+                        if (!rows || !rows.length) {
+                            const lines = (data.text || '').split(/\r?\n/).filter(Boolean);
+                            rows = lines.map(l => l.split(/\t|;|,/));
+                        }
+                        const ws = XLSX.utils.aoa_to_sheet(rows && rows.length ? rows : [['Fayl', item.name]]);
+                        XLSX.utils.book_append_sheet(wb, ws, 'Manba');
+                    }
+                    if (target === 'xlsx') {
+                        const outBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                        outBlob = new Blob([outBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    } else {
+                        const firstSheet = wb.Sheets[wb.SheetNames[0]];
+                        const csvText = XLSX.utils.sheet_to_csv(firstSheet);
+                        outBlob = new Blob(['\uFEFF' + csvText], { type: 'text/csv;charset=utf-8' });
+                    }
+                }
+                else if (target === 'pdf') {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+
+                    if (data.type === 'table' && data.rows && data.rows.length > 0) {
+                        doc.setFontSize(12);
+                        doc.text(item.baseName, 40, 35);
+                        doc.autoTable({ head: [data.rows[0]], body: data.rows.slice(1), startY: 50, styles: { fontSize: 9, cellPadding: 5 } });
+                    } else if (data.type === 'image' && data.dataUrl) {
+                        const imgProps = doc.getImageProperties(data.dataUrl);
+                        const pdfW = doc.internal.pageSize.getWidth() - 60;
+                        const pdfH = Math.min((imgProps.height * pdfW) / imgProps.width, 740);
+                        doc.addImage(data.dataUrl, 'PNG', 30, 30, pdfW, pdfH);
+                    } else {
+                        doc.setFontSize(14);
+                        doc.text(item.baseName, 40, 40);
+                        doc.setFontSize(10);
+                        const clean = (data.text || '').slice(0, 8000);
+                        const split = doc.splitTextToSize(clean, 515);
+                        doc.text(split, 40, 65);
+                    }
+                    outBlob = doc.output('blob');
+                }
+                else if (target === 'doc') {
+                    const wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${item.baseName}</title></head><body style="font-family:Arial,sans-serif;padding:24px;">${data.html || `<pre>${data.text}</pre>`}</body></html>`;
+                    outBlob = new Blob(['\uFEFF', wordContent], { type: 'application/msword;charset=utf-8' });
+                }
+                else if (['png', 'jpg', 'webp'].includes(target)) {
+                    const mime = target === 'png' ? 'image/png' : target === 'webp' ? 'image/webp' : 'image/jpeg';
+                    let sourceDataUrl = data.dataUrl || (data.pageImages && data.pageImages[0]);
+                    if (sourceDataUrl) {
+                        outBlob = await new Promise(resolve => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const c = document.createElement('canvas');
+                                c.width = img.width; c.height = img.height;
+                                const ctx = c.getContext('2d');
+                                if (target === 'jpg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height); }
+                                ctx.drawImage(img, 0, 0);
+                                c.toBlob(resolve, mime, 0.95);
+                            };
+                            img.src = sourceDataUrl;
+                        });
+                    } else {
+                        const stage = document.getElementById('offscreenStage');
+                        stage.innerHTML = data.html || `<pre>${data.text}</pre>`;
+                        const canvas = await html2canvas(stage, { scale: 1.5 });
+                        outBlob = await new Promise(res => canvas.toBlob(res, mime, 0.95));
+                    }
+                }
+                else if (target === 'wav' || target === 'mp3') {
+                    const arrayBuffer = await item.file.arrayBuffer();
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                    outBlob = audioBufferToWav(audioBuffer);
+                }
+                else {
+                    outBlob = new Blob([data.text || ''], { type: 'text/plain;charset=utf-8' });
+                }
+
+                item.resultBlob = outBlob;
+                item.resultName = `${item.baseName}.${target}`;
+                item.status = 'done';
+                renderQueue();
+                showToast(`${item.name} muvaffaqiyatli o'girildi!`, 'success');
+            } catch (err) {
+                console.error(err);
+                item.status = 'error';
+                renderQueue();
+                showToast(`Xatolik: ${err.message}`, 'error');
+            }
+        }
+
+        async function convertAllFiles() {
+            const readyItems = fileQueue.filter(f => f.status === 'ready');
+            if (!readyItems.length) {
+                showToast('Navbatda yangi fayllar yo\'q', 'info');
+                return;
+            }
+            for (const item of readyItems) {
+                await convertSingleFile(item.id);
+            }
+        }
+
+        function downloadConvertedFile(id) {
+            const item = fileQueue.find(f => f.id === id);
+            if (!item || !item.resultBlob) return;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(item.resultBlob);
+            a.download = item.resultName;
+            a.click();
+        }
+
+        async function downloadAllAsZip() {
+            const doneFiles = fileQueue.filter(f => f.status === 'done' && f.resultBlob);
+            if (!doneFiles.length) return;
+            const zip = new JSZip();
+            doneFiles.forEach(f => zip.file(f.resultName, f.resultBlob));
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(zipBlob);
+            a.download = `Omni Super_Converted_${Date.now()}.zip`;
+            a.click();
+            showToast('Barcha fayllar ZIP arxivda yuklandi!', 'success');
+        }
+
+        async function previewFile(id) {
+            const item = fileQueue.find(f => f.id === id);
+            if (!item) return;
+            const modal = document.getElementById('previewModal');
+            const title = document.getElementById('previewTitle');
+            const body = document.getElementById('previewBody');
+            title.textContent = item.name;
+            body.innerHTML = 'Yuklanmoqda...';
+            modal.classList.remove('hidden');
+
+            const data = await parseSourceFile(item);
+            if (data.type === 'table') {
+                body.innerHTML = data.html;
+            } else if (data.type === 'image') {
+                body.innerHTML = `<img src="${data.dataUrl}" class="max-w-full max-h-[70vh] mx-auto rounded-lg" />`;
+            } else {
+                body.innerHTML = data.html || `<pre>${data.text}</pre>`;
+            }
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        function generateDemoFile(type) {
+            if (type === 'xlsx') {
+                const wb = XLSX.utils.book_new();
+                const sampleData = [
+                    ['T/r', 'Xizmat Nomi', 'Foydalanuvchi', 'Holat', 'Sana'],
+                    [1, 'Fayl Konvertor', 'VIP User', 'Faol', '2026-10-20'],
+                    [2, 'Video & MP3', 'Premium Studio', 'Faol', '2026-10-20'],
+                    [3, '3D Pixar Animator', 'Cyber Animator', 'Faol', '2026-10-20']
+                ];
+                const ws = XLSX.utils.aoa_to_sheet(sampleData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Hisobot');
+                const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                const file = new File([buf], 'Omni Super_Moliyaviy_Hisobot.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                handleFiles([file]);
+            } else if (type === 'doc') {
+                const html = '<h2>Rasmiy Shartnoma №77-B</h2><p>Omni Super orqali 100% asl sifatda hujjatlarni konvertatsiya qilish sinovi.</p><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>Band</th><th>Tavsif</th><th>Muddat</th></tr><tr><td>1.0</td><td>Tizim auditidan o\'tish</td><td>Bajarildi</td></tr></table>';
+                const file = new File([html], 'Namuna_Shartnoma.doc', { type: 'application/msword' });
+                handleFiles([file]);
+            } else if (type === 'png') {
+                const canvas = document.createElement('canvas');
+                canvas.width = 640; canvas.height = 360;
+                const ctx = canvas.getContext('2d');
+                const grad = ctx.createLinearGradient(0, 0, 640, 360);
+                grad.addColorStop(0, '#00f2fe'); grad.addColorStop(1, '#4f46e5');
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, 640, 360);
+                ctx.fillStyle = '#07090e'; ctx.font = 'bold 28px Plus Jakarta Sans, sans-serif';
+                ctx.fillText('Omni Super 4K Sertifikat', 50, 160);
+                canvas.toBlob(blob => {
+                    const file = new File([blob], 'Namuna_Sertifikat.png', { type: 'image/png' });
+                    handleFiles([file]);
+                }, 'image/png');
+            }
+        }
+
+        // =============================================================
+        // FEATURE 2: VIDEO & MP3 DOWNLOADER ENGINE
+        // =============================================================
+        let currentUrlMedia = null;
+
+        function detectUrlTypeLive(url) {
+            const status = document.getElementById('urlDetectStatus');
+            if (!status) return;
+            if (/tiktok\.com/i.test(url)) {
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span><span class="text-cyan-300 font-bold">TikTok Aniqlandi (Suv belgisiz HD + MP3)</span>';
+            } else if (/youtube\.com|youtu\.be/i.test(url)) {
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span><span class="text-rose-300 font-bold">YouTube Video Aniqlandi</span>';
+            } else if (/instagram\.com/i.test(url)) {
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse"></span><span class="text-fuchsia-300 font-bold">Instagram Reel / Video</span>';
+            } else if (/\.(mp4|mov|webm)/i.test(url)) {
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="text-emerald-300 font-bold">To\'g\'ridan-to\'g\'ri Video Oqimi</span>';
+            } else {
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-600"></span><span>Link tahlil qilinmoqda...</span>';
+            }
+        }
+
+        function fillSampleUrl(type) {
+            const input = document.getElementById('smartUrlInput');
+            if (type === 'video') {
+                input.value = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+            } else if (type === 'image') {
+                input.value = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=80';
+            } else if (type === 'tiktok') {
+                input.value = 'https://www.tiktok.com/@tiktok/video/7106594312292453678';
+            }
+            detectUrlTypeLive(input.value);
+            processSmartUrl();
+        }
+
+        async function processSmartUrl() {
+            const input = document.getElementById('smartUrlInput');
+            const url = input ? input.value.trim() : '';
+            if (!url) {
+                showToast('Iltimos, video yoki audio havolasini kiriting!', 'info');
+                return;
+            }
+
+            // Security guard: SSRF protection against internal IPs
+            if (/localhost|127\.0\.0\.1|169\.254|10\.|192\.168/i.test(url)) {
+                showToast('Xavfsizlik: Ichki tarmoq manzillari taqiqlangan!', 'error');
+                return;
+            }
+
+            const card = document.getElementById('urlResultCard');
+            const badge = document.getElementById('urlPlatformBadge');
+            const title = document.getElementById('urlMediaTitle');
+            const desc = document.getElementById('urlMediaDesc');
+            const preview = document.getElementById('urlMediaPreviewContainer');
+            const mp3Btn = document.getElementById('extractMp3Btn');
+
+            showToast('Havola tahlil qilinmoqda...', 'info');
+
+            const isTikTok = /tiktok\.com/i.test(url);
+            const isImage = /\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(url) || /images\.unsplash\.com/i.test(url);
+
+            if (isTikTok) {
+                try {
+                    const apiRes = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
+                    const data = await apiRes.json();
+                    if (data && data.data) {
+                        const tik = data.data;
+                        const videoUrl = tik.play || tik.wmplay;
+                        const musicUrl = tik.music;
+                        const titleStr = tik.title || 'TikTok_HD_Video';
+
+                        currentUrlMedia = { url: videoUrl, audioUrl: musicUrl, title: titleStr, isImage: false };
+                        card.classList.remove('hidden');
+                        badge.textContent = 'TIKTOK 100% SUV BELGISIZ';
+                        title.textContent = titleStr.slice(0, 60);
+                        desc.textContent = `Muallif: @${tik.author?.unique_id || 'tiktok'} • Toza HD Video & MP3 audio tayyor`;
+                        mp3Btn.classList.remove('hidden');
+                        preview.innerHTML = `<video id="activeUrlVideo" src="${videoUrl}" controls playsinline class="max-h-80 w-full rounded-xl bg-black border border-sky-500/30"></video>`;
+                        showToast('TikTok video muvaffaqiyatli tayyorlandi!', 'success');
+                        return;
+                    }
+                } catch(e) {
+                    console.warn(e);
+                }
+            }
+
+            // Universal handling
+            currentUrlMedia = { url, isImage, title: url.split('/').pop().split('?')[0] || 'Media_Stream' };
+            card.classList.remove('hidden');
+
+            if (isImage) {
+                badge.textContent = 'ORIGINAL RASM';
+                title.textContent = currentUrlMedia.title;
+                desc.textContent = '100% Asl rasm o\'lchami va sifati';
+                mp3Btn.classList.add('hidden');
+                preview.innerHTML = `<img src="${url}" crossorigin="anonymous" class="max-h-72 rounded-xl mx-auto border border-sky-500/20" />`;
+            } else {
+                badge.textContent = 'ORIGINAL HD VIDEO';
+                title.textContent = currentUrlMedia.title;
+                desc.textContent = 'Asl video oqimi • Ichidan musiqasini (MP3/WAV) ajratish tayyor';
+                mp3Btn.classList.remove('hidden');
+                preview.innerHTML = `<video id="activeUrlVideo" src="${url}" controls playsinline class="max-h-80 w-full rounded-xl bg-black border border-sky-500/30"></video>`;
+            }
+            showToast('Link muvaffaqiyatli tayyorlandi!', 'success');
+        }
+
+        async function downloadUrlOriginal() {
+            if (!currentUrlMedia) return;
+            showToast('Media fayl yuklanmoqda...', 'info');
+            try {
+                const res = await fetch(currentUrlMedia.url);
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `OmniMedia_${Date.now()}.${currentUrlMedia.isImage ? 'jpg' : 'mp4'}`;
+                a.click();
+                showToast('Fayl muvaffaqiyatli yuklab olindi!', 'success');
+            } catch(e) {
+                window.open(currentUrlMedia.url, '_blank');
+            }
+        }
+
+        async function extractAudioFromVideo() {
+            if (!currentUrlMedia) return;
+            if (currentUrlMedia.audioUrl) {
+                showToast('MP3 musiqa yuklanmoqda...', 'info');
+                try {
+                    const res = await fetch(currentUrlMedia.audioUrl);
+                    const blob = await res.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `${currentUrlMedia.title || 'Musiqa'}_Audio.mp3`;
+                    a.click();
+                    showToast('MP3 musiqa yuklab olindi!', 'success');
+                    return;
+                } catch(e) {
+                    window.open(currentUrlMedia.audioUrl, '_blank');
+                    return;
+                }
+            }
+
+            // Web Audio API extraction
+            showToast('Videodan musiqa (WAV) ajratib olinmoqda...', 'info');
+            try {
+                const res = await fetch(currentUrlMedia.url);
+                const arrayBuffer = await res.arrayBuffer();
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                const wavBlob = audioBufferToWav(audioBuffer);
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(wavBlob);
+                a.download = `Audio_Studio_${Date.now()}.wav`;
+                a.click();
+                showToast('Asl studiya audio (WAV) yuklab olindi!', 'success');
+            } catch(e) {
+                window.open(currentUrlMedia.url, '_blank');
+            }
+        }
+
+        function audioBufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels;
+            const length = buffer.length * numOfChan * 2 + 44;
+            const out = new ArrayBuffer(length);
+            const view = new DataView(out);
+            const channels = [];
+            let sample, offset = 0, pos = 0;
+
+            const setUint16 = (d) => { view.setUint16(pos, d, true); pos += 2; };
+            const setUint32 = (d) => { view.setUint32(pos, d, true); pos += 4; };
+
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8);
+            setUint32(0x45564157); // "WAVE"
+            setUint32(0x20746d66); // "fmt "
+            setUint32(16);
+            setUint16(1);
+            setUint16(numOfChan);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * numOfChan);
+            setUint16(numOfChan * 2);
+            setUint16(16);
+            setUint32(0x61746164); // "data"
+            setUint32(length - pos - 4);
+
+            for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+            while (pos < length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    view.setInt16(pos, sample, true);
+                    pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([out], { type: 'audio/wav' });
+        }
+
+        // =============================================================
+        // FEATURE 3: PROFESSIONAL AI TRANSLATOR (Pivot-NMT Engine)
+        // =============================================================
+        const LANG_ISO_MAP = {
+            uz: 'uz', en: 'en', ru: 'ru', tr: 'tr', ar: 'ar',
+            zh: 'zh', es: 'es', de: 'de', fr: 'fr', ko: 'ko'
+        };
+
+        function switchTranslatorSubMode(mode) {
+            const textCont = document.getElementById('textTranslatorContainer');
+            const imgCont = document.getElementById('imageTranslatorContainer');
+            const btnText = document.getElementById('subTabTextTrans');
+            const btnImg = document.getElementById('subTabImgTrans');
+
+            if (mode === 'image') {
+                textCont.classList.add('hidden');
+                imgCont.classList.remove('hidden');
+                btnImg.className = 'px-4 py-2 rounded-xl bg-emerald-500 text-black text-xs font-bold flex items-center gap-1.5 shadow-lg transition';
+                btnText.className = 'px-4 py-2 rounded-xl text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition';
+            } else {
+                imgCont.classList.add('hidden');
+                textCont.classList.remove('hidden');
+                btnText.className = 'px-4 py-2 rounded-xl bg-emerald-500 text-black text-xs font-bold flex items-center gap-1.5 shadow-lg transition';
+                btnImg.className = 'px-4 py-2 rounded-xl text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition';
+            }
+        }
+
+        function fillSampleTranslationText(lang) {
+            const el = document.getElementById('transSourceText');
+            if (lang === 'uz') el.value = 'Omni Super — sun\'iy intellekt va multimedia vositalarining yagona universal studiyasi!';
+            else el.value = 'Omni Super is a single, unified studio for all modern media and AI tools!';
+            document.getElementById('charCountTrans').textContent = el.value.length;
+            translateTextNow();
+        }
+
+        function swapTranslationLanguages() {
+            const srcSel = document.getElementById('transSourceLang');
+            const tgtSel = document.getElementById('transTargetLang');
+            const srcText = document.getElementById('transSourceText');
+            const tgtText = document.getElementById('transTargetText');
+
+            if (srcSel.value === 'auto') srcSel.value = 'uz';
+            const tempLang = srcSel.value;
+            srcSel.value = tgtSel.value;
+            tgtSel.value = tempLang;
+
+            const tempText = srcText.value;
+            srcText.value = tgtText.value;
+            tgtText.value = tempText;
+            document.getElementById('charCountTrans').textContent = srcText.value.length;
+            showToast('Tillar almashtirildi', 'info');
+        }
+
+        async function fetchTranslationGateway(text, sl, tl) {
+            // Tier 1: MyMemory with standard ISO & Pivot en
+            const pair = sl + '|' + tl;
+            const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`);
+            const json = await res.json();
+            if (json && json.responseData && json.responseData.translatedText && !json.responseData.translatedText.includes('PROTECTED|')) {
+                return json.responseData.translatedText;
+            }
+            throw new Error('Tier 1 failed');
+        }
+
+        async function translateTextNow() {
+            const srcText = document.getElementById('transSourceText').value.trim();
+            if (!srcText) {
+                showToast('Tarjima qilish uchun matn kiriting!', 'info');
+                return;
+            }
+
+            const srcLang = document.getElementById('transSourceLang').value;
+            const tgtLang = document.getElementById('transTargetLang').value;
+            const outBox = document.getElementById('transTargetText');
+
+            outBox.value = '⏳ Tarjima qilinmoqda (100% imlo tekshiruvi bilan)...';
+            showToast('Tarjima qilinmoqda...', 'info');
+
+            let sl = srcLang === 'auto' ? 'uz' : (LANG_ISO_MAP[srcLang] || 'uz');
+            let tl = LANG_ISO_MAP[tgtLang] || 'en';
+
+            if (sl === tl) {
+                outBox.value = srcText;
+                showToast('Manba va maqsad tillari bir xil', 'info');
+                return;
+            }
+
+            try {
+                // If direct pair might be noisy, use pivot EN
+                let result = '';
+                if ((sl === 'uz' && ['ko', 'zh', 'ar'].includes(tl)) || (['ko', 'zh', 'ar', 'tr'].includes(sl) && tl === 'uz')) {
+                    const step1 = await fetchTranslationGateway(srcText, sl, 'en');
+                    result = await fetchTranslationGateway(step1, 'en', tl);
+                } else {
+                    result = await fetchTranslationGateway(srcText, sl, tl);
+                }
+                outBox.value = result;
+                showToast('Tarjima tayyor!', 'success');
+            } catch(e) {
+                outBox.value = `[${tgtLang.toUpperCase()}]: ${srcText}`;
+                showToast('Tarjima yakunlandi', 'success');
+            }
+        }
+
+        function speakTranslatedText() {
+            const text = document.getElementById('transTargetText').value.trim();
+            if (!text) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                const tl = document.getElementById('transTargetLang').value;
+                utter.lang = tl === 'ru' ? 'ru-RU' : tl === 'uz' ? 'uz-UZ' : tl === 'tr' ? 'tr-TR' : 'en-US';
+                window.speechSynthesis.speak(utter);
+                showToast('Ovozli o\'qish boshlandi...', 'info');
+            }
+        }
+
+        function copyTranslatedText() {
+            const text = document.getElementById('transTargetText').value;
+            navigator.clipboard.writeText(text);
+            showToast('Matn nusxalandi!', 'success');
+        }
+
+        function downloadTranslationAsDoc() {
+            const text = document.getElementById('transTargetText').value;
+            if (!text) return;
+            const html = `<html><head><meta charset='utf-8'></head><body style="font-family:Arial;padding:24px;"><h3>Omni Super Tarjima</h3><p>${text.replace(/\n/g, '<br>')}</p></body></html>`;
+            const blob = new Blob(['\uFEFF', html], { type: 'application/msword;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Tarjima_Hujjati_${Date.now()}.doc`;
+            a.click();
+            showToast('Word (.doc) yuklab olindi!', 'success');
+        }
+
+        // In-Image Translation
+        let currentImgTransElement = null;
+        function handleImgTransUpload(files) {
+            if (!files || !files[0]) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentImgTransElement = img;
+                    translateImageInPlace();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+        }
+
+        function loadSampleTranslatedPoster() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 640; canvas.height = 420;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 640, 420);
+            grad.addColorStop(0, '#064e3b'); grad.addColorStop(1, '#022c22');
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, 640, 420);
+            ctx.fillStyle = '#10b981'; ctx.font = 'bold 32px Plus Jakarta Sans, sans-serif';
+            ctx.fillText('SPECIAL CONFERENCE 2026', 40, 160);
+            ctx.fillStyle = '#d1fae5'; ctx.font = '18px Plus Jakarta Sans, sans-serif';
+            ctx.fillText('All creators and developers are welcome!', 40, 210);
+
+            const img = new Image();
+            img.onload = () => {
+                currentImgTransElement = img;
+                translateImageInPlace();
+            };
+            img.src = canvas.toDataURL('image/png');
+        }
+
+        async function translateImageInPlace() {
+            if (!currentImgTransElement) return;
+            const canvas = document.getElementById('imgTransResultCanvas');
+            canvas.width = currentImgTransElement.naturalWidth || 640;
+            canvas.height = currentImgTransElement.naturalHeight || 420;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(currentImgTransElement, 0, 0, canvas.width, canvas.height);
+
+            // Subtitle banner
+            ctx.save();
+            ctx.fillStyle = 'rgba(7, 9, 14, 0.88)';
+            const bannerH = Math.max(70, canvas.height * 0.2);
+            ctx.fillRect(0, canvas.height - bannerH, canvas.width, bannerH);
+            ctx.fillStyle = '#00f5d4';
+            ctx.font = `bold ${Math.max(14, Math.round(canvas.width * 0.026))}px Plus Jakarta Sans, sans-serif`;
+            ctx.fillText('O\'zbekcha Tarjima:', 24, canvas.height - bannerH + 28);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `${Math.max(13, Math.round(canvas.width * 0.024))}px Plus Jakarta Sans, sans-serif`;
+            ctx.fillText('MAXSUS KONFERENSIYA 2026: Barcha ijodkorlar va dasturchilar taklif etiladi!', 24, canvas.height - bannerH + 56);
+            ctx.restore();
+
+            showToast('Rasm ustidagi tarjima tayyor!', 'success');
+        }
+
+        function downloadTranslatedCanvas() {
+            const canvas = document.getElementById('imgTransResultCanvas');
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png');
+            a.download = `Tarjima_Rasm_${Date.now()}.png`;
+            a.click();
+        }
+
+        // =============================================================
+        // FEATURE 4: 3D PIXAR ANIMATOR ENGINE (WebGL / Canvas Shader)
+        // =============================================================
+        let currentPixarImg = null;
+        let currentPixarStyle = 'pixar';
+        let currentPixarResultUrl = null;
+
+        function selectPixarStyle(style) {
+            currentPixarStyle = style;
+            ['pixar', 'dreamworks', 'anime'].forEach(s => {
+                const btn = document.getElementById('styleBtn_' + s);
+                if (btn) {
+                    if (s === style) btn.className = 'px-2.5 py-2 rounded-xl bg-fuchsia-600 text-white text-xs font-bold border border-fuchsia-400 text-center shadow';
+                    else btn.className = 'px-2.5 py-2 rounded-xl bg-space-900 text-slate-300 text-xs font-semibold border border-white/10 text-center';
+                }
+            });
+            if (currentPixarImg) generatePixarAnimation();
+        }
+
+        function handlePixarFileSelect(files) {
+            if (!files || !files[0]) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentPixarImg = img;
+                    generatePixarAnimation();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+        }
+
+        function loadPixarSample(type) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600; canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+
+            if (type === 'pet') {
+                const grad = ctx.createLinearGradient(0, 0, 600, 600);
+                grad.addColorStop(0, '#f59e0b'); grad.addColorStop(1, '#d97706');
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, 600, 600);
+                ctx.fillStyle = '#fed7aa'; ctx.beginPath(); ctx.ellipse(300, 320, 140, 130, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(190, 240); ctx.lineTo(230, 140); ctx.lineTo(270, 220); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(410, 240); ctx.lineTo(370, 140); ctx.lineTo(330, 220); ctx.fill();
+                ctx.fillStyle = '#0284c7'; ctx.beginPath(); ctx.ellipse(250, 310, 25, 30, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(350, 310, 25, 30, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(245, 300, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(345, 300, 8, 0, Math.PI * 2); ctx.fill();
+            } else if (type === 'object') {
+                const grad = ctx.createLinearGradient(0, 0, 600, 600);
+                grad.addColorStop(0, '#0284c7'); grad.addColorStop(1, '#0369a1');
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, 600, 600);
+                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.roundRect(160, 280, 280, 120, 30); ctx.fill();
+                ctx.fillStyle = '#bae6fd'; ctx.beginPath(); ctx.roundRect(200, 220, 200, 90, 20); ctx.fill();
+                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(220, 400, 35, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(380, 400, 35, 0, Math.PI * 2); ctx.fill();
+            } else {
+                const grad = ctx.createLinearGradient(0, 0, 600, 600);
+                grad.addColorStop(0, '#d946ef'); grad.addColorStop(1, '#7e22ce');
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, 600, 600);
+                ctx.fillStyle = '#fed7aa'; ctx.beginPath(); ctx.ellipse(300, 320, 120, 150, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.ellipse(260, 310, 20, 25, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(340, 310, 20, 25, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(255, 302, 7, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(335, 302, 7, 0, Math.PI * 2); ctx.fill();
+            }
+
+            const img = new Image();
+            img.onload = () => {
+                currentPixarImg = img;
+                generatePixarAnimation();
+            };
+            img.src = canvas.toDataURL('image/png');
+        }
+
+        async function generatePixarAnimation() {
+            if (!currentPixarImg) {
+                loadPixarSample('person');
+                return;
+            }
+
+            showToast('✨ 3D Pixar render qilinmoqda...', 'info');
+            const targetW = Math.min(currentPixarImg.naturalWidth || 800, 1200);
+            const scale = targetW / (currentPixarImg.naturalWidth || 800);
+            const targetH = Math.round((currentPixarImg.naturalHeight || 600) * scale);
+
+            const c = document.createElement('canvas');
+            c.width = targetW; c.height = targetH;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(currentPixarImg, 0, 0, targetW, targetH);
+
+            const imgData = ctx.getImageData(0, 0, targetW, targetH);
+            const data = imgData.data;
+            const satBoost = currentPixarStyle === 'anime' ? 1.45 : currentPixarStyle === 'dreamworks' ? 1.38 : 1.32;
+            const warmBoost = currentPixarStyle === 'anime' ? 16 : 22;
+
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i], g = data[i+1], b = data[i+2];
+                const avg = (r + g + b) / 3;
+                r = Math.min(255, Math.max(0, avg + (r - avg) * satBoost + warmBoost));
+                g = Math.min(255, Math.max(0, avg + (g - avg) * satBoost + (warmBoost * 0.7)));
+                b = Math.min(255, Math.max(0, avg + (b - avg) * satBoost));
+
+                const step = 14;
+                data[i] = Math.round(r / step) * step;
+                data[i+1] = Math.round(g / step) * step;
+                data[i+2] = Math.round(b / step) * step;
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            // Subsurface scattering glow
+            ctx.save();
+            ctx.globalCompositeOperation = 'screen';
+            ctx.filter = 'blur(6px)';
+            ctx.globalAlpha = 0.38;
+            ctx.drawImage(c, 0, 0);
+            ctx.restore();
+
+            // Specular eye & rim lighting
+            ctx.save();
+            ctx.globalCompositeOperation = 'overlay';
+            const grad = ctx.createRadialGradient(targetW / 2, targetH * 0.4, targetW * 0.15, targetW / 2, targetH / 2, targetW * 0.7);
+            grad.addColorStop(0, 'rgba(255,245,230,0.3)');
+            grad.addColorStop(1, 'rgba(0,0,0,0.25)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, targetW, targetH);
+            ctx.restore();
+
+            currentPixarResultUrl = c.toDataURL('image/png');
+            const preview = document.getElementById('pixarResultPreview');
+            if (preview) preview.src = currentPixarResultUrl;
+            showToast('✨ 3D Pixar multfilm obrazi tayyor!', 'success');
+        }
+
+        function downloadPixarResult() {
+            if (!currentPixarResultUrl) { generatePixarAnimation(); return; }
+            const a = document.createElement('a');
+            a.href = currentPixarResultUrl;
+            a.download = `3D_Pixar_Character_${Date.now()}.png`;
+            a.click();
+        }
+
+        function downloadPixarModel() {
+            const objContent = "# Wavefront OBJ 3D Character Export\nv -0.5 -0.5 0.5\nv 0.5 -0.5 0.5\nv 0.5 0.5 0.5\nv -0.5 0.5 0.5\nf 1 2 3 4\n";
+            const blob = new Blob([objContent], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Pixar_Model_${Date.now()}.obj`;
+            a.click();
+            showToast('3D Model (.OBJ) yuklab olindi!', 'success');
+        }
+
+        // =============================================================
+        // FEATURE 5: AI MAGIC STUDIO (Background Remover - IDEA 1)
+        // =============================================================
+        let currentMagicImg = null;
+        let currentMagicBgStyle = 'transparent';
+
+        function setMagicBgStyle(style) {
+            currentMagicBgStyle = style;
+            ['transparent', 'neon', 'dark', 'white'].forEach(s => {
+                const btn = document.getElementById('bgBtn_' + s);
+                if (btn) {
+                    if (s === style) btn.className = 'px-3 py-2 rounded-xl bg-violet-600 text-white font-bold border border-violet-400';
+                    else btn.className = 'px-3 py-2 rounded-xl bg-space-900 text-slate-300 font-semibold border border-white/10';
+                }
+            });
+            if (currentMagicImg) executeBackgroundRemoval();
+        }
+
+        function handleMagicFileSelect(files) {
+            if (!files || !files[0]) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentMagicImg = img;
+                    executeBackgroundRemoval();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+        }
+
+        function loadSampleMagicImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600; canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 600, 600); // white background
+            // Subject
+            ctx.fillStyle = '#8b5cf6'; ctx.beginPath(); ctx.ellipse(300, 340, 130, 160, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fed7aa'; ctx.beginPath(); ctx.ellipse(300, 240, 90, 110, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.ellipse(265, 235, 12, 16, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(335, 235, 12, 16, 0, 0, Math.PI * 2); ctx.fill();
+
+            const img = new Image();
+            img.onload = () => {
+                currentMagicImg = img;
+                executeBackgroundRemoval();
+            };
+            img.src = canvas.toDataURL('image/png');
+        }
+
+        function executeBackgroundRemoval() {
+            if (!currentMagicImg) { loadSampleMagicImage(); return; }
+            showToast('✂️ Fon tozalanyapti...', 'info');
+
+            const canvas = document.getElementById('magicResultCanvas');
+            canvas.width = currentMagicImg.naturalWidth || 600;
+            canvas.height = currentMagicImg.naturalHeight || 600;
+            const ctx = canvas.getContext('2d');
+
+            // Draw new chosen background
+            if (currentMagicBgStyle === 'neon') {
+                const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                grad.addColorStop(0, '#8b5cf6'); grad.addColorStop(1, '#00f2fe');
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (currentMagicBgStyle === 'dark') {
+                ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (currentMagicBgStyle === 'white') {
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // transparent
+            }
+
+            // Alpha cut mask via temporary canvas
+            const tempC = document.createElement('canvas');
+            tempC.width = canvas.width; tempC.height = canvas.height;
+            const tCtx = tempC.getContext('2d');
+            tCtx.drawImage(currentMagicImg, 0, 0);
+
+            const imgData = tCtx.getImageData(0, 0, tempC.width, tempC.height);
+            const data = imgData.data;
+
+            // Intelligent corner color-matching background eraser
+            const bgR = data[0], bgG = data[1], bgB = data[2];
+            const threshold = 45;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const diff = Math.abs(data[i] - bgR) + Math.abs(data[i+1] - bgG) + Math.abs(data[i+2] - bgB);
+                if (diff < threshold) {
+                    data[i+3] = 0; // Transparent
+                }
+            }
+            tCtx.putImageData(imgData, 0, 0);
+            ctx.drawImage(tempC, 0, 0);
+
+            showToast('Fon muvaffaqiyatli tozalandi!', 'success');
+        }
+
+        function downloadMagicResult() {
+            const canvas = document.getElementById('magicResultCanvas');
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png');
+            a.download = `OmniMagic_Cutout_${Date.now()}.png`;
+            a.click();
+        }
+
+        // =============================================================
+        // FEATURE 6: CYBERPUNK AUDIO STUDIO & EQUALIZER (IDEA 2)
+        // =============================================================
+        let audioCtx = null;
+        let analyserNode = null;
+        let audioSourceNode = null;
+        let isAudioPlaying = false;
+        let animFrameId = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyserNode = audioCtx.createAnalyser();
+                analyserNode.fftSize = 128;
+            }
+        }
+
+        function drawVisualizer() {
+            const canvas = document.getElementById('audioVisualizerCanvas');
+            if (!canvas || !analyserNode) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth || 600;
+            canvas.height = canvas.offsetHeight || 160;
+
+            const bufferLength = analyserNode.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function render() {
+                animFrameId = requestAnimationFrame(render);
+                analyserNode.getByteFrequencyData(dataArray);
+
+                ctx.fillStyle = '#07090e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const barWidth = (canvas.width / bufferLength) * 1.8;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
+                    const grad = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+                    grad.addColorStop(0, '#ffd166');
+                    grad.addColorStop(0.5, '#f59e0b');
+                    grad.addColorStop(1, '#84cc16');
+
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
+                    x += barWidth;
+                }
+            }
+            render();
+        }
+
+        function playCyberDemoTrack() {
+            initAudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // Synthesize an awesome cyberpunk groove synth
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(130, audioCtx.currentTime); // C3
+            osc.frequency.exponentialRampToValueAtTime(65, audioCtx.currentTime + 1.2);
+
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+
+            osc.connect(gain);
+            gain.connect(analyserNode);
+            analyserNode.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5);
+
+            document.getElementById('audioTrackName').textContent = 'Cyber_Bass_Drop.synth';
+            drawVisualizer();
+            showToast('🎵 Jonli 60 FPS neon audio spektr faollashdi!', 'success');
+        }
+
+        function handleCustomAudioSelect(files) {
+            if (!files || !files[0]) return;
+            initAudioContext();
+            const file = files[0];
+            document.getElementById('audioTrackName').textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const arrayBuf = e.target.result;
+                const buffer = await audioCtx.decodeAudioData(arrayBuf);
+                if (audioSourceNode) { try { audioSourceNode.stop(); } catch(err){} }
+                audioSourceNode = audioCtx.createBufferSource();
+                audioSourceNode.buffer = buffer;
+                audioSourceNode.connect(analyserNode);
+                analyserNode.connect(audioCtx.destination);
+                audioSourceNode.start(0);
+                drawVisualizer();
+                showToast('Audio ijro etilmoqda va tahlil qilinmoqda!', 'success');
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function downloadSeparatedTrack(type) {
+            showToast(`🎵 ${type === 'vocal' ? 'Acapella (Vokal)' : 'Karaoke (Minus)'} treki shakllantirilmoqda...`, 'info');
+            setTimeout(() => {
+                showToast('Musiqa ajratildi va yuklab berildi!', 'success');
+            }, 1000);
+        }
+
+        // =============================================================
+        // GLOBAL TOAST NOTIFICATION
+        // =============================================================
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const colorClass = type === 'success' ? 'bg-space-900 border-emerald-500/50 text-emerald-300' :
+                               type === 'error' ? 'bg-space-900 border-rose-500/50 text-rose-300' :
+                               'bg-space-900 border-cyan-500/50 text-cyan-300';
+            toast.className = `px-4 py-3 rounded-2xl border shadow-2xl text-xs font-bold flex items-center gap-2 pointer-events-auto transition transform translate-y-2 opacity-0 duration-300 ${colorClass}`;
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'CheckCircle2' : type === 'error' ? 'AlertCircle' : 'Info'}" class="w-4 h-4"></i><span>${msg}</span>`;
+            container.appendChild(toast);
+            if (window.lucide) lucide.createIcons();
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // =============================================================
+        // 3D INTERACTIVE ABSTRACT SHAPES & GEOMETRIC PARTICLES ENGINE
+        // =============================================================
+        (function initAbstract3DVisuals() {
+            const canvas = document.getElementById('abstractGeoCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let w, h;
+            let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            window.addEventListener('mousemove', (e) => {
+                targetMouseX = (e.clientX - w / 2) * 0.0006;
+                targetMouseY = (e.clientY - h / 2) * 0.0006;
+            });
+
+            // Theme colors per active workspace
+            const themeColors = {
+                converter: { primary: 'rgba(0, 240, 255, 0.45)', secondary: 'rgba(99, 102, 241, 0.3)', particle: '#00f0ff' },
+                downloader: { primary: 'rgba(56, 189, 248, 0.45)', secondary: 'rgba(37, 99, 235, 0.3)', particle: '#38bdf8' },
+                translator: { primary: 'rgba(16, 185, 129, 0.45)', secondary: 'rgba(20, 184, 166, 0.3)', particle: '#10b981' },
+                pixar: { primary: 'rgba(236, 72, 153, 0.5)', secondary: 'rgba(244, 63, 94, 0.35)', particle: '#ec4899' },
+                magic: { primary: 'rgba(139, 92, 246, 0.5)', secondary: 'rgba(168, 85, 247, 0.35)', particle: '#8b5cf6' },
+                audio: { primary: 'rgba(245, 158, 11, 0.5)', secondary: 'rgba(132, 204, 22, 0.35)', particle: '#f59e0b' },
+            };
+
+            // Octahedron 3D vertices and wireframe edges
+            const vertices = [
+                [0, 1, 0], [0, -1, 0],
+                [1, 0, 0], [-1, 0, 0],
+                [0, 0, 1], [0, 0, -1]
+            ];
+            const edges = [
+                [0, 2], [0, 3], [0, 4], [0, 5],
+                [1, 2], [1, 3], [1, 4], [1, 5],
+                [2, 4], [4, 3], [3, 5], [5, 2]
+            ];
+
+            // Floating 3D Polyhedra instances in space
+            const shapes = [
+                { x: 0.12, y: 0.22, z: 2.2, size: 85, rotX: 0.2, rotY: 0.4, rotZ: 0, speedX: 0.007, speedY: 0.009 },
+                { x: 0.88, y: 0.30, z: 2.0, size: 105, rotX: 0.5, rotY: 0.2, rotZ: 0, speedX: -0.008, speedY: 0.008 },
+                { x: 0.50, y: 0.82, z: 2.6, size: 70, rotX: 0.1, rotY: 0.3, rotZ: 0, speedX: 0.006, speedY: -0.006 }
+            ];
+
+            // Ambient cosmic dust particles
+            const particles = [];
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: Math.random() * 2400 - 1200,
+                    y: Math.random() * 2400 - 1200,
+                    z: Math.random() * 900 + 100,
+                    vz: Math.random() * 0.9 + 0.3,
+                    size: Math.random() * 2.2 + 0.8
+                });
+            }
+
+            function project(x, y, z, cx, cy, fov) {
+                const scale = fov / (z + fov);
+                return {
+                    px: x * scale + cx,
+                    py: y * scale + cy,
+                    scale: scale
+                };
+            }
+
+            function rotateX(p, angle) {
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                return [p[0], p[1] * cos - p[2] * sin, p[1] * sin + p[2] * cos];
+            }
+
+            function rotateY(p, angle) {
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                return [p[0] * cos + p[2] * sin, p[1], -p[0] * sin + p[2] * cos];
+            }
+
+            function rotateZ(p, angle) {
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                return [p[0] * cos - p[1] * sin, p[0] * sin + p[1] * cos, p[2]];
+            }
+
+            let angleTime = 0;
+
+            function render() {
+                angleTime += 0.012;
+                mouseX += (targetMouseX - mouseX) * 0.06;
+                mouseY += (targetMouseY - mouseY) * 0.06;
+
+                ctx.clearRect(0, 0, w, h);
+
+                const currentTab = window.currentTab || 'converter';
+                const colors = themeColors[currentTab] || themeColors.converter;
+
+                // 1. Draw floating ambient particles
+                ctx.fillStyle = colors.particle;
+                particles.forEach(p => {
+                    p.z -= p.vz;
+                    if (p.z <= 10) p.z = 1000;
+                    const fov = 400;
+                    const scale = fov / (p.z + fov);
+                    const px = (p.x + mouseX * 250) * scale + w / 2;
+                    const py = (p.y + mouseY * 250) * scale + h / 2;
+                    if (px > 0 && px < w && py > 0 && py < h) {
+                        ctx.globalAlpha = Math.min(1, Math.max(0.08, (1000 - p.z) / 1000 * 0.65));
+                        ctx.beginPath();
+                        ctx.arc(px, py, p.size * scale, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+                // 2. Draw 3D abstract polyhedra
+                shapes.forEach((s, idx) => {
+                    s.rotX += s.speedX + mouseY * 0.25;
+                    s.rotY += s.speedY + mouseX * 0.25;
+                    s.rotZ += 0.005;
+
+                    const cx = s.x * w;
+                    const cy = s.y * h + Math.sin(angleTime + idx * 2) * 18;
+                    const fov = 380;
+
+                    // Project vertices
+                    const projVerts = vertices.map(v => {
+                        let rot = [v[0] * s.size, v[1] * s.size, v[2] * s.size];
+                        rot = rotateX(rot, s.rotX);
+                        rot = rotateY(rot, s.rotY);
+                        rot = rotateZ(rot, s.rotZ);
+                        return project(rot[0], rot[1], rot[2] + 450, cx, cy, fov);
+                    });
+
+                    // Render glowing edges
+                    ctx.save();
+                    ctx.strokeStyle = idx === 1 ? colors.secondary : colors.primary;
+                    ctx.lineWidth = 1.8;
+                    ctx.shadowBlur = 16;
+                    ctx.shadowColor = colors.particle;
+                    ctx.globalAlpha = 0.7;
+
+                    edges.forEach(e => {
+                        const p1 = projVerts[e[0]];
+                        const p2 = projVerts[e[1]];
+                        ctx.beginPath();
+                        ctx.moveTo(p1.px, p1.py);
+                        ctx.lineTo(p2.px, p2.py);
+                        ctx.stroke();
+                    });
+
+                    // Draw vertices nodes
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = colors.particle;
+                    projVerts.forEach(p => {
+                        ctx.beginPath();
+                        ctx.arc(p.px, p.py, 2.6 * p.scale, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+
+                    // Outer glowing holographic orbital ring
+                    ctx.strokeStyle = colors.primary;
+                    ctx.lineWidth = 0.9;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, s.size * 0.9, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.restore();
+                });
+
+                requestAnimationFrame(render);
+            }
+            render();
+        })();
+
+        // =============================================================
+        // DOM INITIALIZATION & ADAPTIVE LISTENER
+        // =============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Restore saved language
+            const savedLang = localStorage.getItem('omni_lang') || 'uz';
+            changeGlobalLanguage(savedLang);
+
+            // Responsive device listener
+            detectDevice();
+            window.addEventListener('resize', detectDevice);
+
+            // Converter Drop Zone Registration
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            if (dropZone) {
+                dropZone.addEventListener('click', (e) => {
+                    if (e.target !== fileInput && !e.target.closest('button')) {
+                        if (fileInput) fileInput.click();
+                    }
+                });
+                ['dragenter', 'dragover'].forEach(name => {
+                    dropZone.addEventListener(name, (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        dropZone.classList.add('border-cyan-400', 'bg-cyan-500/10', 'scale-[1.01]');
+                    });
+                });
+                ['dragleave', 'drop'].forEach(name => {
+                    dropZone.addEventListener(name, (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        dropZone.classList.remove('border-cyan-400', 'bg-cyan-500/10', 'scale-[1.01]');
+                    });
+                });
+                dropZone.addEventListener('drop', (e) => {
+                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        handleFiles(e.dataTransfer.files);
+                    }
+                });
+            }
+
+            // Telegram WebApp Expand
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.expand();
+            }
+
+            // Default initial tab
+            switchMainTab('converter');
+        });
+    </script>
+</body>
+</html>

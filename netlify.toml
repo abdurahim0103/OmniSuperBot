@@ -1,0 +1,28 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/.env*"
+  to = "/"
+  status = 403
+  force = true
+
+[[redirects]]
+  from = "/.git*"
+  to = "/"
+  status = 403
+  force = true
+
+[[redirects]]
+  from = "/temp_workspace/*"
+  to = "/"
+  status = 403
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self), microphone=(self)"

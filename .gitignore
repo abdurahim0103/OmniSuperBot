@@ -1,0 +1,46 @@
+# Secrets & Credentials (STRICTLY FORBIDDEN FROM VERSION CONTROL)
+.env
+*.env
+.env.*
+!.env.example
+omnibot/.env
+
+# Python Virtual Environments & Packages
+venv/
+.venv/
+omnibot/venv/
+omnibot/.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Workspaces & Temporary Runtime Artifacts
+temp_workspace/
+omnibot/temp_workspace/
+*.tmp
+*.temp
+downloads/
+
+# Backup & Non-Production Drafts
+*.backup*
+index.html.*backup*
+index.html.novatools_design
+extracted_design/
+
+# Deployment & Build Logs
+.netlify
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# System & OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

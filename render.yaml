@@ -1,0 +1,22 @@
+services:
+  - type: worker
+    name: omni-super-bot
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python omnibot/bot.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: APP_ENV
+        value: production
+      - key: SSRF_PROTECTION_ENABLED
+        value: "true"
+
+  - type: web
+    name: omni-super-web
+    env: static
+    region: frankfurt
+    plan: free
+    staticPublishPath: .
