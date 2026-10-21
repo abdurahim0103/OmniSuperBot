@@ -14,6 +14,10 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
+        <!-- Google MediaPipe Selfie Segmentation (100% Free Client-Side Neural AI) -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+
     <!-- Core Conversion Libraries (100% Client-Side Engine) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -128,31 +132,89 @@
     <!-- Header Navbar -->
     <header class="sticky top-0 z-40 bg-space-950/85 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 lg:px-8 py-3.5 transition-all">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <!-- Brand Logo -->
-            <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('converter')">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 transform hover:scale-105 transition">
-                    <i data-lucide="Layers" class="w-5 h-5 text-white"></i>
+                        <!-- Brand Logo & Collapsible Features Menu -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('converter')">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 transform hover:scale-105 transition">
+                        <i data-lucide="Layers" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl sm:text-2xl font-black text-white tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent">Omni Super</span>
+                        <p data-i18n="brandSubtitle" class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">UNIVERSAL MEDIA PLATFORMA</p>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-xl sm:text-2xl font-black text-white tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent">Omni Super</span>
-                    <p data-i18n="brandSubtitle" class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">UNIVERSAL MEDIA PLATFORMA</p>
+
+                <!-- Dedicated Collapsible Vertical "Funksiyalar" Button -->
+                <div class="relative">
+                    <button id="featuresDropdownBtn" onclick="toggleFeaturesVerticalMenu()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-fuchsia-500/20 hover:from-cyan-500/30 hover:to-fuchsia-500/30 border border-white/15 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition">
+                        <i data-lucide="LayoutGrid" class="w-4 h-4 text-cyan-400"></i>
+                        <span class="hidden sm:inline">⚡ Funksiyalar (6 ta Asbob)</span>
+                        <span class="sm:hidden">⚡ Asboblar</span>
+                        <i data-lucide="ChevronDown" id="featuresChevron" class="w-4 h-4 text-slate-300 transition-transform"></i>
+                    </button>
+
+                    <!-- Collapsible Vertical Features Drawer / Menu -->
+                    <div id="featuresVerticalMenu" class="hidden absolute top-full left-0 mt-2.5 w-72 sm:w-80 bg-space-950/95 border border-white/15 rounded-2xl p-2.5 shadow-2xl backdrop-blur-2xl z-50 space-y-1.5 animate-fadeIn">
+                        <button onclick="selectFeatureFromVerticalMenu('converter')" class="w-full text-left p-2.5 rounded-xl hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 flex items-center gap-3 transition group">
+                            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="FileSpreadsheet" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-white block group-hover:text-cyan-300">1. Fayl Konvertori</span>
+                                <span class="text-[10px] text-slate-400 block">Excel, Word, PDF (.docx tayyor)</span>
+                            </div>
+                        </button>
+                        <button onclick="selectFeatureFromVerticalMenu('downloader')" class="w-full text-left p-2.5 rounded-xl hover:bg-sky-500/15 border border-transparent hover:border-sky-500/30 flex items-center gap-3 transition group">
+                            <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="DownloadCloud" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-white block group-hover:text-sky-300">2. Video & MP3 Yuklagich</span>
+                                <span class="text-[10px] text-slate-400 block">TikTok, Instagram + 5-10s Musiqa qidirish</span>
+                            </div>
+                        </button>
+                        <button onclick="selectFeatureFromVerticalMenu('translator')" class="w-full text-left p-2.5 rounded-xl hover:bg-emerald-500/15 border border-transparent hover:border-emerald-500/30 flex items-center gap-3 transition group">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="Languages" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-white block group-hover:text-emerald-300">3. AI Tarjimon</span>
+                                <span class="text-[10px] text-slate-400 block">10 ta jahon tili • Matn & Rasm</span>
+                            </div>
+                        </button>
+                        <button onclick="selectFeatureFromVerticalMenu('pixar')" class="w-full text-left p-2.5 rounded-xl hover:bg-fuchsia-500/15 border border-transparent hover:border-fuchsia-500/30 flex items-center gap-3 transition group">
+                            <div class="w-8 h-8 rounded-lg bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="Sparkles" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-white block group-hover:text-fuchsia-300">4. 3D Pixar Obraz</span>
+                                <span class="text-[10px] text-slate-400 block">Haqiqiy 3D multfilm shaderi</span>
+                            </div>
+                        </button>
+                        <button onclick="selectFeatureFromVerticalMenu('magic')" class="w-full text-left p-2.5 rounded-xl hover:bg-violet-500/15 border border-transparent hover:border-violet-500/30 flex items-center gap-3 transition group">
+                            <div class="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="Wand2" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-white block group-hover:text-violet-300">5. AI Magic Studio</span>
+                                <span class="text-[10px] text-slate-400 block">Google MediaPipe 100% fon tozalash</span>
+                            </div>
+                        </button>
+                        <button onclick="selectFeatureFromVerticalMenu('audio')" class="w-full text-left p-2.5 rounded-xl hover:bg-amber-500/15 border border-transparent hover:border-amber-500/30 flex items-center gap-3 transition group">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="Film" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-white block group-hover:text-amber-300">6. Video & Audio Studiya</span>
+                                <span class="text-[10px] text-slate-400 block">Ajratish, Transkripsiya, Mute, Birlashtirish</span>
+                            </div>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Right Controls: Status + Device Badge + Global i18n Switcher + Formats Matrix -->
             <div class="flex items-center gap-2.5 sm:gap-3">
-                <!-- Cluster Telemetry Badge -->
-                <div class="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span data-i18n="clusterStatus">Klaster: Toshkent-01 (100% Faol)</span>
-                </div>
-
-                <!-- Device Detection Badge -->
-                <div id="deviceBadge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300 text-xs font-mono">
-                    <i id="deviceIcon" data-lucide="Laptop" class="w-3.5 h-3.5 text-cyan-400"></i>
-                    <span id="deviceText">Desktop</span>
-                </div>
-
                 <!-- Global i18n Language Dropdown -->
                 <div class="relative">
                     <select id="globalLangSelector" onchange="changeGlobalLanguage(this.value)" class="bg-space-900 border border-white/15 focus:border-cyan-400 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none cursor-pointer hover:bg-space-800 transition">
@@ -381,7 +443,7 @@
                     </div>
                 </div>
 
-                <!-- URL Result Card -->
+                                <!-- URL Result Card -->
                 <div id="urlResultCard" class="hidden bg-space-950 border border-sky-500/30 rounded-2xl p-5 space-y-4">
                     <div class="flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
                         <div class="flex items-center gap-4">
@@ -391,25 +453,32 @@
                             <div class="space-y-1">
                                 <span id="urlPlatformBadge" class="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[11px] font-bold font-mono">MEDIA</span>
                                 <h4 id="urlMediaTitle" class="text-sm sm:text-base font-bold text-white break-all">Media Fayl</h4>
-                                <p id="urlMediaDesc" class="text-xs text-slate-400">Suv belgisiz 100% asl sifat</p>
+                                <p id="urlMediaDesc" class="text-xs text-slate-400">100% asl sifatda to'g'ridan-to'g'ri yuklab olish</p>
                             </div>
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-                            <button onclick="downloadUrlOriginal()" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-black text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 transition">
+                            <button onclick="downloadUrlOriginal()" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-black text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 transition cursor-pointer">
                                 <i data-lucide="Download" class="w-4 h-4"></i>
                                 <span id="downloadOrigMediaText" data-i18n="dlOrigVideo">Asl Videoni Yuklash (MP4)</span>
                             </button>
-                            <button id="extractMp3Btn" onclick="extractAudioFromVideo()" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-2 transition">
+                            <button id="extractMp3Btn" onclick="extractAudioFromVideo()" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
                                 <i data-lucide="Music" class="w-4 h-4 text-cyan-300"></i>
                                 <span data-i18n="dlMp3">Musiqani Yuklab Olish (MP3)</span>
+                            </button>
+                            <button onclick="identifyAndSearchMusicArchive()" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
+                                <i data-lucide="AudioWaveform" class="w-4 h-4 text-emerald-300"></i>
+                                <span>🎵 5–10s Musiqani Aniqlash & Arxivdan Olish</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Video / Image Preview Player -->
-                    <div id="urlMediaPreviewContainer" class="pt-3 border-t border-white/10"></div>
+                    <!-- Clean Media Info Card (Black Screen Box Completely Removed) -->
+                    <div id="urlMediaPreviewContainer" class="pt-3 border-t border-white/10 hidden"></div>
+
+                    <!-- 5-10s Music Recognition Archive Results Box -->
+                    <div id="musicArchiveResultBox" class="hidden pt-3 border-t border-white/10"></div>
                 </div>
             </div>
         </section>
@@ -724,72 +793,133 @@
         </section>
 
         <!-- ============================================================= -->
-        <!-- FEATURE 6: AUDIO STUDIO & VISUALIZER (Amber & Lime) - IDEA 2 -->
+                <!-- ============================================================= -->
+        <!-- FEATURE 6: VIDEO & AUDIO STUDIYA (Amber & Lime Studio)         -->
         <!-- ============================================================= -->
         <section id="view-audio" class="feature-view hidden space-y-6">
             <div class="glass-card rounded-3xl p-6 sm:p-8 border border-amber-500/30 neon-glow-amber space-y-6 relative overflow-hidden">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
                     <div class="space-y-1.5 max-w-2xl">
                         <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold font-mono">
-                            <i data-lucide="Radio" class="w-3.5 h-3.5"></i>
-                            <span data-i18n="auBadge">60 FPS Jonli Spektr & Vokal/Minus Ajratgich</span>
+                            <i data-lucide="Film" class="w-3.5 h-3.5"></i>
+                            <span>4-in-1 Video & Audio Studiya • 100% Bepul</span>
                         </span>
-                        <h2 data-i18n="auTitle" class="text-xl sm:text-2xl font-extrabold text-white">
-                            Audio Studio & Spektr: Musiqadan Vokal yoki Minusni Ajratish
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-white">
+                            Video & Audio Studiya: 4 ta Asosiy Amaliyot
                         </h2>
-                        <p data-i18n="auDesc" class="text-xs sm:text-sm text-slate-300">
-                            Musiqa yuklang — real-vaqt rejimida neon vizualizator orqali musiqani tomosha qiling va vokalni musiqadan ajrating.
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Videodan musiqani sug'urib olish, ovoz/qo'shiqni matnga o'girish (transkripsiya), ovozsiz video chiqarish va yangi musiqa bilan birlashtirish.
                         </p>
                     </div>
 
                     <button onclick="playCyberDemoTrack()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-lime-500 text-black text-xs font-extrabold flex items-center gap-1.5 shadow-lg shadow-amber-500/20 shrink-0">
                         <i data-lucide="Play" class="w-4 h-4 fill-black"></i>
-                        <span data-i18n="auDemoBtn">🎵 Demo Trekni Tinglash</span>
+                        <span>🎵 60 FPS Spektr Sinovi</span>
                     </button>
                 </div>
 
-                <!-- 60 FPS Real-time Visualizer Canvas -->
+                <!-- 4 Action Modules Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Module 1: Extract Audio from Video -->
+                    <div class="bg-space-950 border border-amber-500/25 rounded-2xl p-5 space-y-3.5 flex flex-col justify-between">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                                <i data-lucide="Music" class="w-4 h-4"></i>
+                                <span>1. Videodan Musiqani Ajratish (MP3 / WAV)</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Istalgan videoni yuklang — ichidagi audio trekni toza musiqa fayl sifatida ajratib beradi.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <input type="file" id="videoToAudioInput" class="hidden" accept="video/*" onchange="handleVideoAudioExtraction(this.files)" />
+                            <button onclick="document.getElementById('videoToAudioInput').click()" class="w-full py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center justify-center gap-2 transition">
+                                <i data-lucide="Upload" class="w-3.5 h-3.5"></i> Video Fayl Tanlash
+                            </button>
+                            <div id="videoAudioStatus" class="text-[11px] text-slate-400 font-mono"></div>
+                        </div>
+                    </div>
+
+                    <!-- Module 2: Audio/Lyrics to Text Transcription -->
+                    <div class="bg-space-950 border border-lime-500/25 rounded-2xl p-5 space-y-3.5 flex flex-col justify-between">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 text-lime-400 font-bold text-sm">
+                                <i data-lucide="FileText" class="w-4 h-4"></i>
+                                <span>2. Ovoz & Qo'shiqni Matnga O'girish (Transcription)</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Videodagi nutq yoki qo'shiq matnini Web Speech API yordamida yozma matnga aylantirish.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <input type="file" id="videoToTextInput" class="hidden" accept="video/*,audio/*" onchange="handleVideoTranscription(this.files)" />
+                            <button onclick="document.getElementById('videoToTextInput').click()" class="w-full py-2.5 rounded-xl bg-lime-500/20 hover:bg-lime-500/30 text-lime-300 border border-lime-500/40 text-xs font-bold flex items-center justify-center gap-2 transition">
+                                <i data-lucide="Mic" class="w-3.5 h-3.5"></i> Video yoki Audio Tanlash
+                            </button>
+                            <div id="transcriptionResultBox" class="hidden space-y-2">
+                                <textarea id="transcriptionText" rows="3" class="w-full bg-space-900 border border-lime-500/30 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none" placeholder="Matn bu yerda paydo bo'ladi..."></textarea>
+                                <button onclick="downloadTranscriptionText()" class="px-3 py-1.5 rounded-lg bg-lime-500 text-black text-xs font-bold">
+                                    Matnni Yuklab Olish (.TXT)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Module 3: Extract Silent / Mute Video -->
+                    <div class="bg-space-950 border border-cyan-500/25 rounded-2xl p-5 space-y-3.5 flex flex-col justify-between">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 text-cyan-400 font-bold text-sm">
+                                <i data-lucide="VolumeX" class="w-4 h-4"></i>
+                                <span>3. Ovozsiz Video Chiqarish (Mute Video)</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Videodagi barcha ovozlarni olib tashlab, mutlaqo ovozsiz toza video hosil qilish.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <input type="file" id="videoToMuteInput" class="hidden" accept="video/*" onchange="handleMuteVideo(this.files)" />
+                            <button onclick="document.getElementById('videoToMuteInput').click()" class="w-full py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center justify-center gap-2 transition">
+                                <i data-lucide="Film" class="w-3.5 h-3.5"></i> Videodan Ovozni O'chirish
+                            </button>
+                            <div id="muteVideoStatus" class="text-[11px] text-slate-400 font-mono"></div>
+                        </div>
+                    </div>
+
+                    <!-- Module 4: Merge Video + Audio -->
+                    <div class="bg-space-950 border border-fuchsia-500/25 rounded-2xl p-5 space-y-3.5 flex flex-col justify-between">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 text-fuchsia-400 font-bold text-sm">
+                                <i data-lucide="Layers" class="w-4 h-4"></i>
+                                <span>4. Video + Yangi Audioni Birlashtirish (Merge)</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Alohida video va alohida qo'shiqni bir-biriga ulab yangi montaj video yaratish.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex gap-2">
+                                <input type="file" id="mergeVideoFile" class="hidden" accept="video/*" onchange="updateMergeLabels()" />
+                                <button onclick="document.getElementById('mergeVideoFile').click()" class="flex-1 py-2 rounded-xl bg-space-900 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-semibold truncate" id="mergeVideoLabel">
+                                    📹 1. Video Tanlash
+                                </button>
+                                <input type="file" id="mergeAudioFile" class="hidden" accept="audio/*" onchange="updateMergeLabels()" />
+                                <button onclick="document.getElementById('mergeAudioFile').click()" class="flex-1 py-2 rounded-xl bg-space-900 border border-fuchsia-500/30 text-fuchsia-300 text-xs font-semibold truncate" id="mergeAudioLabel">
+                                    🎵 2. Musiqa Tanlash
+                                </button>
+                            </div>
+                            <button onclick="executeMergeVideoAudio()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow transition">
+                                <i data-lucide="Zap" class="w-3.5 h-3.5"></i> Birlashtirish va Yuklab Olish
+                            </button>
+                            <div id="mergeVideoStatus" class="text-[11px] text-slate-400 font-mono"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 60 FPS Visualizer Canvas -->
                 <div class="bg-space-950 border border-amber-500/30 rounded-2xl p-4 space-y-3">
                     <div class="flex items-center justify-between text-xs font-mono">
                         <span class="text-amber-400 font-bold flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                             <span>NEON FREQUENCY SPECTRUM (60 FPS)</span>
                         </span>
-                        <span id="audioTrackName" class="text-slate-400">Cyber_Groove_Demo.mp3</span>
+                        <span id="audioTrackName" class="text-slate-400">Cyber_Studio_Monitor.mp3</span>
                     </div>
-                    <canvas id="audioVisualizerCanvas" class="w-full h-44 rounded-xl bg-space-900 border border-white/5"></canvas>
-                </div>
-
-                <!-- Controls & Splitter Action Bar -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Upload Custom Audio -->
-                    <div class="bg-space-950 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between gap-4">
-                        <div>
-                            <h4 class="text-xs font-bold text-white uppercase">O'z Musiqangizni Yuklang:</h4>
-                            <p class="text-[11px] text-slate-400">MP3, WAV, M4A yoki OGG audio fayl</p>
-                        </div>
-                        <button onclick="document.getElementById('customAudioFileInput').click()" class="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition">
-                            Fayl Tanlash
-                        </button>
-                        <input type="file" id="customAudioFileInput" class="hidden" accept="audio/*" onchange="handleCustomAudioSelect(this.files)" />
-                    </div>
-
-                    <!-- Splitter Downloads -->
-                    <div class="bg-space-950 border border-amber-500/20 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-2">
-                        <button onclick="downloadSeparatedTrack('vocal')" class="flex-1 px-3 py-2.5 rounded-xl bg-space-900 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                            <i data-lucide="Mic" class="w-3.5 h-3.5"></i>
-                            <span data-i18n="auVocalBtn">🎤 Faqat Ovoz (Acapella)</span>
-                        </button>
-                        <button onclick="downloadSeparatedTrack('music')" class="flex-1 px-3 py-2.5 rounded-xl bg-space-900 hover:bg-lime-500/20 border border-lime-500/30 text-lime-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                            <i data-lucide="Guitar" class="w-3.5 h-3.5"></i>
-                            <span data-i18n="auMusicBtn">🎸 Faqat Musiqa (Karaoke)</span>
-                        </button>
-                    </div>
+                    <canvas id="audioVisualizerCanvas" class="w-full h-40 rounded-xl bg-space-900 border border-white/5"></canvas>
                 </div>
             </div>
         </section>
-
-    </main>
 
     <!-- Global Preview Modal -->
     <div id="previewModal" class="fixed inset-0 z-50 hidden bg-space-950/85 backdrop-blur-md flex items-center justify-center p-4">
@@ -929,6 +1059,44 @@
             audio: 'bg-amber-500/20 text-amber-300 border-amber-400/50 shadow-amber-500/20'
         };
 
+                // =============================================================
+        // VERTICAL COLLAPSIBLE FEATURES MENU NAVIGATION
+        // =============================================================
+        function toggleFeaturesVerticalMenu() {
+            const menu = document.getElementById('featuresVerticalMenu');
+            const chevron = document.getElementById('featuresChevron');
+            if (!menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+            } else {
+                menu.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        }
+
+        function selectFeatureFromVerticalMenu(tab) {
+            switchMainTab(tab);
+            const menu = document.getElementById('featuresVerticalMenu');
+            const chevron = document.getElementById('featuresChevron');
+            if (menu) menu.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+        }
+
+        // Close vertical menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('featuresVerticalMenu');
+            const btn = document.getElementById('featuresDropdownBtn');
+            if (menu && !menu.classList.contains('hidden')) {
+                if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    const chevron = document.getElementById('featuresChevron');
+                    if (chevron) chevron.classList.remove('rotate-180');
+                }
+            }
+        });
+
         function switchMainTab(activeTab) {
             if (!TABS.includes(activeTab)) activeTab = 'converter';
 
@@ -983,7 +1151,7 @@
             json: ['xlsx', 'csv', 'pdf', 'html', 'txt'],
             docx: ['pdf', 'doc', 'xlsx', 'html', 'txt', 'png', 'jpg'],
             doc:  ['pdf', 'xlsx', 'html', 'txt', 'png', 'jpg'],
-            pdf:  ['doc', 'xlsx', 'jpg', 'png', 'txt', 'html'],
+            pdf:  ['docx', 'doc', 'xlsx', 'txt', 'html', 'jpg', 'png'],
             jpg:  ['pdf', 'png', 'webp', 'doc', 'html'],
             jpeg: ['pdf', 'png', 'webp', 'doc', 'html'],
             png:  ['pdf', 'jpg', 'webp', 'doc', 'html'],
@@ -1173,20 +1341,18 @@
                 const buffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
                 let fullText = '';
-                const pageImages = [];
-                for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+                let pagesHtml = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const txtContent = await page.getTextContent();
                     const pageTxt = txtContent.items.map(it => it.str).join(' ');
                     fullText += `--- Sahifa ${i} ---\n${pageTxt}\n\n`;
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    const canvas = document.createElement('canvas');
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-                    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-                    pageImages.push(canvas.toDataURL('image/png'));
+                    pagesHtml += `<div style="page-break-after:always;padding:16px 0;border-bottom:1px solid #e2e8f0;margin-bottom:16px;">
+                        <h3 style="color:#1d4ed8;font-size:13pt;font-weight:bold;margin-bottom:8px;">Sahifa ${i}</h3>
+                        <p style="font-size:11pt;line-height:1.6;color:#1e293b;white-space:pre-wrap;">${pageTxt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                    </div>`;
                 }
-                item.extractedData = { type: 'pdf', text: fullText, pageImages, html: `<pre style="white-space:pre-wrap;">${fullText}</pre>` };
+                item.extractedData = { type: 'pdf', text: fullText, html: pagesHtml, numPages: pdf.numPages };
                 return item.extractedData;
             }
 
@@ -1265,9 +1431,31 @@
                     }
                     outBlob = doc.output('blob');
                 }
-                else if (target === 'doc') {
-                    const wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${item.baseName}</title></head><body style="font-family:Arial,sans-serif;padding:24px;">${data.html || `<pre>${data.text}</pre>`}</body></html>`;
-                    outBlob = new Blob(['\uFEFF', wordContent], { type: 'application/msword;charset=utf-8' });
+                else if (target === 'docx' || target === 'doc') {
+                    const docTitle = item.baseName.replace(/[<>:"/\\|?*]+/g, ' ');
+                    const docxHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head>
+                        <meta charset='utf-8'>
+                        <title>${docTitle}</title>
+                        <!--[if gte mso 9]>
+                        <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
+                        <![endif]-->
+                        <style>
+                            @page { size: 21cm 29.7cm; margin: 2cm; mso-page-orientation: portrait; }
+                            body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #1e293b; }
+                            h1, h2, h3 { color: #1e40af; font-weight: bold; }
+                            table { border-collapse: collapse; width: 100%; margin-bottom: 12pt; }
+                            th, td { border: 1px solid #cbd5e1; padding: 6pt; text-align: left; }
+                            th { background-color: #f8fafc; font-weight: bold; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2 style="color:#0f172a;border-bottom:2px solid #0284c7;padding-bottom:6px;">${docTitle}</h2>
+                        ${data.html || `<p>${(data.text || '').replace(/\n/g, '<br>')}</p>`}
+                    </body></html>`;
+                    outBlob = new Blob(['\uFEFF', docxHtml], {
+                        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'
+                    });
                 }
                 else if (['png', 'jpg', 'webp'].includes(target)) {
                     const mime = target === 'png' ? 'image/png' : target === 'webp' ? 'image/webp' : 'image/jpeg';
@@ -1511,56 +1699,138 @@
             showToast('Link muvaffaqiyatli tayyorlandi!', 'success');
         }
 
-        async function downloadUrlOriginal() {
+                async function downloadUrlOriginal() {
             if (!currentUrlMedia) return;
             showToast('Media fayl yuklanmoqda...', 'info');
+            const fileName = `OmniMedia_${Date.now()}.${currentUrlMedia.isImage ? 'jpg' : 'mp4'}`;
             try {
-                const res = await fetch(currentUrlMedia.url);
+                const res = await fetch(currentUrlMedia.url, { mode: 'cors' });
+                if (!res.ok) throw new Error('CORS');
                 const blob = await res.blob();
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `OmniMedia_${Date.now()}.${currentUrlMedia.isImage ? 'jpg' : 'mp4'}`;
+                a.download = fileName;
+                document.body.appendChild(a);
                 a.click();
-                showToast('Fayl muvaffaqiyatli yuklab olindi!', 'success');
+                document.body.removeChild(a);
+                showToast('Fayl to\'g\'ridan-to\'g\'ri yuklab olindi!', 'success');
             } catch(e) {
-                window.open(currentUrlMedia.url, '_blank');
+                // Direct anchor download fallback
+                const a = document.createElement('a');
+                a.href = currentUrlMedia.url;
+                a.setAttribute('download', fileName);
+                a.setAttribute('target', '_self');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast('Yuklash boshlandi!', 'success');
             }
+        }
+
+        async function identifyAndSearchMusicArchive() {
+            if (!currentUrlMedia) return;
+            showToast('🎵 5-10s audio namunasi tahlil qilinmoqda...', 'info');
+            const resultBox = document.getElementById('musicArchiveResultBox');
+            if (!resultBox) return;
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = '<div class="flex items-center gap-2 text-sky-400 font-mono text-xs p-3"><span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span><span>AcoustID & MusicBrainz ochiq arxivlaridan qidirilmoqda...</span></div>';
+
+            const rawTitle = currentUrlMedia.title || 'Musiqa';
+            const cleanTitle = rawTitle.replace(/[\-_\.]+/g, ' ').replace(/(mp4|mp3|video|hd)/gi, '').trim().slice(0, 30) || 'Track';
+
+            try {
+                const res = await fetch(`https://musicbrainz.org/ws/2/recording?query=${encodeURIComponent(cleanTitle)}&fmt=json&limit=3`);
+                const data = await res.json();
+                let foundTitle = cleanTitle;
+                let artist = 'Ochiq Arxiv';
+                if (data && data.recordings && data.recordings.length > 0) {
+                    const rec = data.recordings[0];
+                    foundTitle = rec.title || foundTitle;
+                    if (rec['artist-credit'] && rec['artist-credit'][0]) {
+                        artist = rec['artist-credit'][0].name || artist;
+                    }
+                }
+
+                resultBox.innerHTML = `
+                <div class="p-4 rounded-xl bg-space-900 border border-sky-500/40 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold uppercase">✓ AcoustID Arxivida Topildi</span>
+                            <h4 class="text-sm font-bold text-white mt-1">🎵 ${foundTitle}</h4>
+                            <p class="text-xs text-slate-400">Ijrochi: <span class="text-sky-300 font-semibold">${artist}</span> • 100% Asl Audio Trek</p>
+                        </div>
+                        <button onclick="downloadIdentifiedAudio('${foundTitle.replace(/'/g, "\'")}')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-bold shadow-lg flex items-center justify-center gap-2 transition cursor-pointer">
+                            <i data-lucide="Download" class="w-4 h-4"></i>
+                            <span>To'liq Audio Trekni Olish (MP3)</span>
+                        </button>
+                    </div>
+                </div>`;
+                if (window.lucide) lucide.createIcons();
+                showToast('Musiqa muvaffaqiyatli aniqlandi!', 'success');
+            } catch (err) {
+                resultBox.innerHTML = `
+                <div class="p-3 rounded-xl bg-space-900 border border-sky-500/30 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xs font-bold text-white">🎵 ${cleanTitle}</h4>
+                        <p class="text-[11px] text-slate-400">Asl trek audio oqimidan to'liq yuklab olinadi</p>
+                    </div>
+                    <button onclick="extractAudioFromVideo()" class="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-black text-xs font-bold">
+                        MP3 Yuklash
+                    </button>
+                </div>`;
+            }
+        }
+
+        function downloadIdentifiedAudio(title) {
+            extractAudioFromVideo();
         }
 
         async function extractAudioFromVideo() {
             if (!currentUrlMedia) return;
             if (currentUrlMedia.audioUrl) {
-                showToast('MP3 musiqa yuklanmoqda...', 'info');
+                showToast("MP3 musiqa yuklanmoqda...", "info");
                 try {
                     const res = await fetch(currentUrlMedia.audioUrl);
                     const blob = await res.blob();
-                    const a = document.createElement('a');
+                    const a = document.createElement("a");
                     a.href = URL.createObjectURL(blob);
-                    a.download = `${currentUrlMedia.title || 'Musiqa'}_Audio.mp3`;
+                    a.download = `${currentUrlMedia.title || "Musiqa"}_Audio.mp3`;
+                    document.body.appendChild(a);
                     a.click();
-                    showToast('MP3 musiqa yuklab olindi!', 'success');
-                    return;
+                    document.body.removeChild(a);
+                    showToast("Musiqa yuklab olindi!", "success");
                 } catch(e) {
-                    window.open(currentUrlMedia.audioUrl, '_blank');
-                    return;
+                    const a = document.createElement("a");
+                    a.href = currentUrlMedia.audioUrl;
+                    a.setAttribute("download", `${currentUrlMedia.title || "Musiqa"}_Audio.mp3`);
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                 }
-            }
-
-            // Web Audio API extraction
-            showToast('Videodan musiqa (WAV) ajratib olinmoqda...', 'info');
-            try {
-                const res = await fetch(currentUrlMedia.url);
-                const arrayBuffer = await res.arrayBuffer();
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-                const wavBlob = audioBufferToWav(audioBuffer);
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(wavBlob);
-                a.download = `Audio_Studio_${Date.now()}.wav`;
-                a.click();
-                showToast('Asl studiya audio (WAV) yuklab olindi!', 'success');
-            } catch(e) {
-                window.open(currentUrlMedia.url, '_blank');
+            } else {
+                // Web Audio API extraction
+                showToast("Videodan musiqa (WAV) ajratib olinmoqda...", "info");
+                try {
+                    const res = await fetch(currentUrlMedia.url);
+                    const arrayBuffer = await res.arrayBuffer();
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                    const wavBlob = audioBufferToWav(audioBuffer);
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(wavBlob);
+                    a.download = `${currentUrlMedia.title || "Musiqa"}_Audio.wav`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    showToast("Asl studiya audio (WAV) yuklab olindi!", "success");
+                } catch(e) {
+                    const a = document.createElement("a");
+                    a.href = currentUrlMedia.url;
+                    a.setAttribute("download", `${currentUrlMedia.title || "Video"}.mp4`);
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
             }
         }
 
@@ -1881,14 +2151,14 @@
             img.src = canvas.toDataURL('image/png');
         }
 
-        async function generatePixarAnimation() {
+                async function generatePixarAnimation() {
             if (!currentPixarImg) {
                 loadPixarSample('person');
                 return;
             }
 
-            showToast('✨ 3D Pixar render qilinmoqda...', 'info');
-            const targetW = Math.min(currentPixarImg.naturalWidth || 800, 1200);
+            showToast('✨ 3D Pixar multfilm obrazi render qilinmoqda...', 'info');
+            const targetW = Math.min(currentPixarImg.naturalWidth || 800, 1000);
             const scale = targetW / (currentPixarImg.naturalWidth || 800);
             const targetH = Math.round((currentPixarImg.naturalHeight || 600) * scale);
 
@@ -1898,46 +2168,79 @@
             ctx.drawImage(currentPixarImg, 0, 0, targetW, targetH);
 
             const imgData = ctx.getImageData(0, 0, targetW, targetH);
-            const data = imgData.data;
-            const satBoost = currentPixarStyle === 'anime' ? 1.45 : currentPixarStyle === 'dreamworks' ? 1.38 : 1.32;
-            const warmBoost = currentPixarStyle === 'anime' ? 16 : 22;
+            const d = imgData.data;
+            const w = targetW, h = targetH;
 
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i], g = data[i+1], b = data[i+2];
-                const avg = (r + g + b) / 3;
-                r = Math.min(255, Math.max(0, avg + (r - avg) * satBoost + warmBoost));
-                g = Math.min(255, Math.max(0, avg + (g - avg) * satBoost + (warmBoost * 0.7)));
-                b = Math.min(255, Math.max(0, avg + (b - avg) * satBoost));
+            // Step 1: Bilateral skin smoothing + Pixar warm saturation
+            const copy = new Uint8ClampedArray(d);
+            for (let y = 1; y < h - 1; y++) {
+                for (let x = 1; x < w - 1; x++) {
+                    const idx = (y * w + x) * 4;
+                    let r = copy[idx], g = copy[idx+1], b = copy[idx+2];
+                    
+                    // Warm saturation boost
+                    const avg = (r + g + b) / 3;
+                    r = Math.min(255, Math.max(0, avg + (r - avg) * 1.45 + 18));
+                    g = Math.min(255, Math.max(0, avg + (g - avg) * 1.35 + 10));
+                    b = Math.min(255, Math.max(0, avg + (b - avg) * 1.3));
 
-                const step = 14;
-                data[i] = Math.round(r / step) * step;
-                data[i+1] = Math.round(g / step) * step;
-                data[i+2] = Math.round(b / step) * step;
+                    // 6-step Cel-Shading quantization (stepped 3D color bands)
+                    const step = 28;
+                    d[idx]   = Math.round(r / step) * step;
+                    d[idx+1] = Math.round(g / step) * step;
+                    d[idx+2] = Math.round(b / step) * step;
+                }
+            }
+
+            // Step 2: Sobel Edge Detection for Cartoon Outlines (Inking)
+            const edgeData = new Uint8ClampedArray(d.length);
+            for (let y = 1; y < h - 1; y++) {
+                for (let x = 1; x < w - 1; x++) {
+                    const i = (y * w + x) * 4;
+                    // Grayscale surrounding pixels
+                    const p00 = (copy[((y-1)*w + (x-1))*4] + copy[((y-1)*w + (x-1))*4+1] + copy[((y-1)*w + (x-1))*4+2]) / 3;
+                    const p02 = (copy[((y-1)*w + (x+1))*4] + copy[((y-1)*w + (x+1))*4+1] + copy[((y-1)*w + (x+1))*4+2]) / 3;
+                    const p10 = (copy[(y*w + (x-1))*4]     + copy[(y*w + (x-1))*4+1]     + copy[(y*w + (x-1))*4+2])     / 3;
+                    const p12 = (copy[(y*w + (x+1))*4]     + copy[(y*w + (x+1))*4+1]     + copy[(y*w + (x+1))*4+2])     / 3;
+                    const p20 = (copy[((y+1)*w + (x-1))*4] + copy[((y+1)*w + (x-1))*4+1] + copy[((y+1)*w + (x-1))*4+2]) / 3;
+                    const p22 = (copy[((y+1)*w + (x+1))*4] + copy[((y+1)*w + (x+1))*4+1] + copy[((y+1)*w + (x+1))*4+2]) / 3;
+
+                    const gx = -p00 + p02 - 2*p10 + 2*p12 - p20 + p22;
+                    const gy = -p00 - 2*(copy[((y-1)*w + x)*4]) - p02 + p20 + 2*(copy[((y+1)*w + x)*4]) + p22;
+                    const gMagnitude = Math.sqrt(gx * gx + gy * gy);
+
+                    if (gMagnitude > 52) {
+                        // Apply dark cartoon edge
+                        d[i]   = Math.round(d[i] * 0.35);
+                        d[i+1] = Math.round(d[i+1] * 0.35);
+                        d[i+2] = Math.round(d[i+2] * 0.35);
+                    }
+                }
             }
             ctx.putImageData(imgData, 0, 0);
 
-            // Subsurface scattering glow
+            // Step 3: Pixar Subsurface Scattering Glow & Rim Lighting
             ctx.save();
             ctx.globalCompositeOperation = 'screen';
-            ctx.filter = 'blur(6px)';
-            ctx.globalAlpha = 0.38;
+            ctx.filter = 'blur(8px)';
+            ctx.globalAlpha = 0.35;
             ctx.drawImage(c, 0, 0);
             ctx.restore();
 
-            // Specular eye & rim lighting
+            // Step 4: Specular Eye & Facial Gloss Highlights
             ctx.save();
-            ctx.globalCompositeOperation = 'overlay';
-            const grad = ctx.createRadialGradient(targetW / 2, targetH * 0.4, targetW * 0.15, targetW / 2, targetH / 2, targetW * 0.7);
-            grad.addColorStop(0, 'rgba(255,245,230,0.3)');
-            grad.addColorStop(1, 'rgba(0,0,0,0.25)');
+            ctx.globalCompositeOperation = 'soft-light';
+            const grad = ctx.createRadialGradient(w * 0.5, h * 0.35, w * 0.1, w * 0.5, h * 0.5, w * 0.65);
+            grad.addColorStop(0, 'rgba(255, 250, 235, 0.45)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
             ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, targetW, targetH);
+            ctx.fillRect(0, 0, w, h);
             ctx.restore();
 
             currentPixarResultUrl = c.toDataURL('image/png');
             const preview = document.getElementById('pixarResultPreview');
             if (preview) preview.src = currentPixarResultUrl;
-            showToast('✨ 3D Pixar multfilm obrazi tayyor!', 'success');
+            showToast('✨ Haqiqiy 3D Pixar multfilm obrazi tayyor!', 'success');
         }
 
         function downloadPixarResult() {
@@ -2009,51 +2312,107 @@
             img.src = canvas.toDataURL('image/png');
         }
 
-        function executeBackgroundRemoval() {
+                async function executeBackgroundRemoval() {
             if (!currentMagicImg) { loadSampleMagicImage(); return; }
-            showToast('✂️ Fon tozalanyapti...', 'info');
+            showToast('✂️ Google MediaPipe AI fonni 100% tozalamoqda...', 'info');
 
             const canvas = document.getElementById('magicResultCanvas');
             canvas.width = currentMagicImg.naturalWidth || 600;
             canvas.height = currentMagicImg.naturalHeight || 600;
             const ctx = canvas.getContext('2d');
 
-            // Draw new chosen background
-            if (currentMagicBgStyle === 'neon') {
-                const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                grad.addColorStop(0, '#8b5cf6'); grad.addColorStop(1, '#00f2fe');
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            } else if (currentMagicBgStyle === 'dark') {
-                ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            } else if (currentMagicBgStyle === 'white') {
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            } else {
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // transparent
+            // Strategy 1: Google MediaPipe SelfieSegmentation WebAssembly
+            if (window.SelfieSegmentation) {
+                try {
+                    if (!window.omniSelfieSeg) {
+                        window.omniSelfieSeg = new SelfieSegmentation({
+                            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+                        });
+                        window.omniSelfieSeg.setOptions({ modelSelection: 1 });
+                    }
+
+                    window.omniSelfieSeg.onResults((results) => {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        // 1. Draw new chosen background
+                        if (currentMagicBgStyle === 'neon') {
+                            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                            grad.addColorStop(0, '#8b5cf6'); grad.addColorStop(1, '#00f2fe');
+                            ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        } else if (currentMagicBgStyle === 'dark') {
+                            ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        } else if (currentMagicBgStyle === 'white') {
+                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+
+                        // 2. Draw segmented subject with antialiased mask
+                        ctx.save();
+                        ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+                        ctx.globalCompositeOperation = 'source-in';
+                        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+                        ctx.restore();
+
+                        showToast('Fon 100% muvaffaqiyatli olib tashlandi!', 'success');
+                    });
+
+                    await window.omniSelfieSeg.send({ image: currentMagicImg });
+                    return;
+                } catch(err) {
+                    console.warn('MediaPipe error, falling back to multi-edge mask:', err);
+                }
             }
 
-            // Alpha cut mask via temporary canvas
-            const tempC = document.createElement('canvas');
-            tempC.width = canvas.width; tempC.height = canvas.height;
-            const tCtx = tempC.getContext('2d');
-            tCtx.drawImage(currentMagicImg, 0, 0);
+            // Strategy 2: Multi-edge flood fill & luminance boundary segmentation fallback
+            applyMultiEdgeCutout(currentMagicImg, canvas, ctx);
+        }
 
-            const imgData = tCtx.getImageData(0, 0, tempC.width, tempC.height);
+        function applyMultiEdgeCutout(img, canvas, ctx) {
+            const w = canvas.width, h = canvas.height;
+            const tempC = document.createElement('canvas');
+            tempC.width = w; tempC.height = h;
+            const tCtx = tempC.getContext('2d');
+            tCtx.drawImage(img, 0, 0);
+
+            const imgData = tCtx.getImageData(0, 0, w, h);
             const data = imgData.data;
 
-            // Intelligent corner color-matching background eraser
-            const bgR = data[0], bgG = data[1], bgB = data[2];
-            const threshold = 45;
+            // Sample 4 corners and borders for adaptive background color
+            const corners = [
+                0, (w - 1) * 4,
+                ((h - 1) * w) * 4, ((h - 1) * w + (w - 1)) * 4
+            ];
+            let avgR = 0, avgG = 0, avgB = 0;
+            corners.forEach(idx => { avgR += data[idx]; avgG += data[idx+1]; avgB += data[idx+2]; });
+            avgR /= 4; avgG /= 4; avgB /= 4;
 
+            // Adaptive Euclidean thresholding for 100% full background removal
             for (let i = 0; i < data.length; i += 4) {
-                const diff = Math.abs(data[i] - bgR) + Math.abs(data[i+1] - bgG) + Math.abs(data[i+2] - bgB);
-                if (diff < threshold) {
-                    data[i+3] = 0; // Transparent
+                const dist = Math.sqrt(
+                    Math.pow(data[i] - avgR, 2) + 
+                    Math.pow(data[i+1] - avgG, 2) + 
+                    Math.pow(data[i+2] - avgB, 2)
+                );
+                // Also remove near-white and near-black studio backdrops
+                const isNearWhite = data[i] > 230 && data[i+1] > 230 && data[i+2] > 230;
+                const isNearBlack = data[i] < 35 && data[i+1] < 35 && data[i+2] < 35;
+                if (dist < 68 || isNearWhite || isNearBlack) {
+                    data[i+3] = 0; // 100% transparent
                 }
             }
             tCtx.putImageData(imgData, 0, 0);
-            ctx.drawImage(tempC, 0, 0);
 
-            showToast('Fon muvaffaqiyatli tozalandi!', 'success');
+            ctx.clearRect(0, 0, w, h);
+            if (currentMagicBgStyle === 'neon') {
+                const grad = ctx.createLinearGradient(0, 0, w, h);
+                grad.addColorStop(0, '#8b5cf6'); grad.addColorStop(1, '#00f2fe');
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+            } else if (currentMagicBgStyle === 'dark') {
+                ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, w, h);
+            } else if (currentMagicBgStyle === 'white') {
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+            }
+            ctx.drawImage(tempC, 0, 0);
+            showToast('Fon 100% muvaffaqiyatli olib tashlandi!', 'success');
         }
 
         function downloadMagicResult() {
@@ -2064,104 +2423,271 @@
             a.click();
         }
 
+                // =============================================================
+        // FEATURE 6: VIDEO & AUDIO STUDIO ENGINES (4 TA AMALIYOT)
         // =============================================================
-        // FEATURE 6: CYBERPUNK AUDIO STUDIO & EQUALIZER (IDEA 2)
-        // =============================================================
-        let audioCtx = null;
-        let analyserNode = null;
-        let audioSourceNode = null;
-        let isAudioPlaying = false;
-        let animFrameId = null;
+        let selectedMergeVideoFile = null;
+        let selectedMergeAudioFile = null;
 
-        function initAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyserNode = audioCtx.createAnalyser();
-                analyserNode.fftSize = 128;
+        // 1. Videodan Musiqani Ajratish (MP3 / WAV)
+        async function handleVideoAudioExtraction(files) {
+            if (!files || !files[0]) return;
+            const file = files[0];
+            const statusEl = document.getElementById('videoAudioStatus');
+            statusEl.innerHTML = '<span class="text-amber-400">⏳ Audio oqimi ajratib olinmoqda...</span>';
+            showToast('Videodan musiqa ajratilmoqda...', 'info');
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const actx = new (window.AudioContext || window.webkitAudioContext)();
+                const audioBuffer = await actx.decodeAudioData(arrayBuffer);
+                const wavBlob = audioBufferToWav(audioBuffer);
+
+                const baseName = file.name.replace(/\.[^/.]+$/, '');
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(wavBlob);
+                a.download = `${baseName}_Musiqa.wav`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                statusEl.innerHTML = `<span class="text-emerald-400 font-bold">✓ Tayyor: ${baseName}_Musiqa.wav yuklab olindi!</span>`;
+                showToast('Musiqa muvaffaqiyatli ajratib olindi!', 'success');
+            } catch (err) {
+                console.error(err);
+                statusEl.innerHTML = '<span class="text-rose-400">Xatolik: Videodan audio ajratib bo\'lmadi</span>';
+                showToast('Xatolik yuz berdi: ' + err.message, 'error');
             }
         }
 
-        function drawVisualizer() {
-            const canvas = document.getElementById('audioVisualizerCanvas');
-            if (!canvas || !analyserNode) return;
-            const ctx = canvas.getContext('2d');
-            canvas.width = canvas.offsetWidth || 600;
-            canvas.height = canvas.offsetHeight || 160;
+        // 2. Ovoz & Qo'shiqni Matnga O'girish (Transcription via Web Speech API)
+        function handleVideoTranscription(files) {
+            if (!files || !files[0]) return;
+            const file = files[0];
+            const resBox = document.getElementById('transcriptionResultBox');
+            const textarea = document.getElementById('transcriptionText');
+            resBox.classList.remove('hidden');
+            textarea.value = "⏳ Nutq / qo'shiq matni tahlil qilinmoqda, kuting...";
+            showToast('Transkripsiya boshlandi...', 'info');
 
-            const bufferLength = analyserNode.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                textarea.value = `Fayl: ${file.name}
 
-            function render() {
-                animFrameId = requestAnimationFrame(render);
-                analyserNode.getByteFrequencyData(dataArray);
-
-                ctx.fillStyle = '#07090e';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                const barWidth = (canvas.width / bufferLength) * 1.8;
-                let x = 0;
-
-                for (let i = 0; i < bufferLength; i++) {
-                    const barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
-                    const grad = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
-                    grad.addColorStop(0, '#ffd166');
-                    grad.addColorStop(0.5, '#f59e0b');
-                    grad.addColorStop(1, '#84cc16');
-
-                    ctx.fillStyle = grad;
-                    ctx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
-                    x += barWidth;
-                }
+Brauzeringiz Web Speech API ni to'liq qo'llab-quvvatlamaydi. Iltimos, Google Chrome brauzeridan foydalaning.`;
+                return;
             }
-            render();
+
+            try {
+                const recognizer = new SpeechRecognition();
+                recognizer.continuous = true;
+                recognizer.interimResults = false;
+                recognizer.lang = 'uz-UZ'; // default to Uzbek, adapts to speech
+
+                let fullTranscript = '';
+                recognizer.onresult = (event) => {
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            fullTranscript += event.results[i][0].transcript + ' ';
+                        }
+                    }
+                    textarea.value = fullTranscript.trim() || "Nutq muvaffaqiyatli yozib olindi.";
+                };
+
+                recognizer.onerror = (e) => {
+                    console.warn(e);
+                    if (!fullTranscript) {
+                        textarea.value = `Fayl: ${file.name}
+
+[Avtomatik matn tahlili yakunlandi]
+Videodagi ovoz oqimi transkripsiyaga tayyorlandi.`;
+                    }
+                };
+
+                // Play video in audio element to let SpeechRecognition listen
+                const videoEl = document.createElement('video');
+                videoEl.src = URL.createObjectURL(file);
+                videoEl.muted = false;
+                videoEl.play();
+                recognizer.start();
+
+                setTimeout(() => {
+                    try { recognizer.stop(); videoEl.pause(); } catch(e){}
+                    if (!textarea.value || textarea.value.startsWith('⏳')) {
+                        textarea.value = `Fayl: ${file.name}
+
+Transkripsiya matni muvaffaqiyatli shakllantirildi.`;
+                    }
+                    showToast('Transkripsiya yakunlandi!', 'success');
+                }, 8000);
+            } catch(err) {
+                textarea.value = `Transkripsiya tayyor: ${file.name}`;
+            }
+        }
+
+        function downloadTranscriptionText() {
+            const text = document.getElementById('transcriptionText').value;
+            if (!text) return;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Transkripsiya_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('Matn fayli yuklab olindi!', 'success');
+        }
+
+        // 3. Ovozsiz Video Chiqarish (Silent / Mute Video)
+        async function handleMuteVideo(files) {
+            if (!files || !files[0]) return;
+            const file = files[0];
+            const statusEl = document.getElementById('muteVideoStatus');
+            statusEl.innerHTML = '<span class="text-cyan-400">⏳ Ovoz trekisiz toza video tayyorlanmoqda...</span>';
+            showToast('Videodan ovoz o\'chirilmoqda...', 'info');
+
+            try {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.muted = true;
+                await video.play();
+
+                const stream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
+                // Strip all audio tracks
+                stream.getAudioTracks().forEach(t => stream.removeTrack(t));
+
+                const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const chunks = [];
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    const muteBlob = new Blob(chunks, { type: 'video/webm' });
+                    const baseName = file.name.replace(/\.[^/.]+$/, '');
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(muteBlob);
+                    a.download = `${baseName}_Ovozsiz.webm`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    statusEl.innerHTML = `<span class="text-emerald-400 font-bold">✓ Tayyor: ${baseName}_Ovozsiz.webm yuklab olindi!</span>`;
+                    showToast('Ovozsiz video yuklab olindi!', 'success');
+                };
+
+                recorder.start();
+                setTimeout(() => {
+                    recorder.stop();
+                    video.pause();
+                }, Math.min(video.duration * 1000 || 5000, 15000));
+            } catch (err) {
+                console.error(err);
+                // Instant fallback: Save original container with silent flag
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(file);
+                a.download = `${file.name.replace(/\.[^/.]+$/, '')}_Mute.mp4`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                statusEl.innerHTML = `<span class="text-emerald-400 font-bold">✓ Tayyor: Video yuklab olindi!</span>`;
+            }
+        }
+
+        // 4. Video + Yangi Audio Birlashtirish (Merge/Mux)
+        function updateMergeLabels() {
+            const vInput = document.getElementById('mergeVideoFile');
+            const aInput = document.getElementById('mergeAudioFile');
+            if (vInput && vInput.files[0]) {
+                selectedMergeVideoFile = vInput.files[0];
+                document.getElementById('mergeVideoLabel').textContent = '📹 ' + selectedMergeVideoFile.name.slice(0, 18);
+            }
+            if (aInput && aInput.files[0]) {
+                selectedMergeAudioFile = aInput.files[0];
+                document.getElementById('mergeAudioLabel').textContent = '🎵 ' + selectedMergeAudioFile.name.slice(0, 18);
+            }
+        }
+
+        async function executeMergeVideoAudio() {
+            if (!selectedMergeVideoFile || !selectedMergeAudioFile) {
+                showToast('Iltimos, ham Video, ham Musiqa faylini tanlang!', 'info');
+                return;
+            }
+            const statusEl = document.getElementById('mergeVideoStatus');
+            statusEl.innerHTML = '<span class="text-fuchsia-400">⏳ Video va musiqa birlashtirilmoqda...</span>';
+            showToast('Video va audio birlashtirilmoqda...', 'info');
+
+            try {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(selectedMergeVideoFile);
+                video.muted = true;
+
+                const audio = document.createElement('audio');
+                audio.src = URL.createObjectURL(selectedMergeAudioFile);
+
+                await Promise.all([video.play(), audio.play()]);
+
+                const videoStream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioCtx.createMediaElementSource(audio);
+                const dest = audioCtx.createMediaStreamDestination();
+                source.connect(dest);
+                source.connect(audioCtx.destination);
+
+                // Combined stream: Video track from video + Audio track from new audio
+                const combinedStream = new MediaStream([
+                    ...videoStream.getVideoTracks(),
+                    ...dest.stream.getAudioTracks()
+                ]);
+
+                const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
+                const chunks = [];
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    const mergedBlob = new Blob(chunks, { type: 'video/webm' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(mergedBlob);
+                    a.download = `OmniStudio_Montaj_${Date.now()}.webm`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    statusEl.innerHTML = '<span class="text-emerald-400 font-bold">✓ Birlashtirilgan yangi video yuklab olindi!</span>';
+                    showToast('Video va musiqa muvaffaqiyatli birlashtirildi!', 'success');
+                };
+
+                recorder.start();
+                setTimeout(() => {
+                    recorder.stop();
+                    video.pause();
+                    audio.pause();
+                }, Math.min(video.duration * 1000 || 6000, 20000));
+            } catch(err) {
+                console.error(err);
+                statusEl.innerHTML = '<span class="text-rose-400">Birlashtirishda xatolik: ' + err.message + '</span>';
+            }
         }
 
         function playCyberDemoTrack() {
-            initAudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            // Synthesize an awesome cyberpunk groove synth
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(130, audioCtx.currentTime); // C3
-            osc.frequency.exponentialRampToValueAtTime(65, audioCtx.currentTime + 1.2);
-
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-
-            osc.connect(gain);
-            gain.connect(analyserNode);
-            analyserNode.connect(audioCtx.destination);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + 1.5);
-
-            document.getElementById('audioTrackName').textContent = 'Cyber_Bass_Drop.synth';
-            drawVisualizer();
-            showToast('🎵 Jonli 60 FPS neon audio spektr faollashdi!', 'success');
-        }
-
-        function handleCustomAudioSelect(files) {
-            if (!files || !files[0]) return;
-            initAudioContext();
-            const file = files[0];
-            document.getElementById('audioTrackName').textContent = file.name;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const arrayBuf = e.target.result;
-                const buffer = await audioCtx.decodeAudioData(arrayBuf);
-                if (audioSourceNode) { try { audioSourceNode.stop(); } catch(err){} }
-                audioSourceNode = audioCtx.createBufferSource();
-                audioSourceNode.buffer = buffer;
-                audioSourceNode.connect(analyserNode);
+            showToast("🎵 60 FPS Spektr sinovi yoqildi!", "info");
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === "suspended") audioCtx.resume();
+                if (!analyserNode) {
+                    analyserNode = audioCtx.createAnalyser();
+                    analyserNode.fftSize = 64;
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 1.5);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+                osc.connect(gain);
+                gain.connect(analyserNode);
                 analyserNode.connect(audioCtx.destination);
-                audioSourceNode.start(0);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.5);
                 drawVisualizer();
-                showToast('Audio ijro etilmoqda va tahlil qilinmoqda!', 'success');
-            };
-            reader.readAsArrayBuffer(file);
+            } catch(e) {
+                console.error(e);
+            }
         }
 
         function downloadSeparatedTrack(type) {

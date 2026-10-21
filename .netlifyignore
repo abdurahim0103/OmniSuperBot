@@ -1,0 +1,14 @@
+.env*
+*.env
+omnibot/
+temp_workspace/
+venv/
+.git/
+.DS_Store
+*.backup*
+*.py
+requirements.txt
+Dockerfile
+Procfile
+render.yaml
+README.md
