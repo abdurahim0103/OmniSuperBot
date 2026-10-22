@@ -691,61 +691,77 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
                     <div class="space-y-1.5 max-w-2xl">
                         <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-bold">
-                            <i data-lucide="Wand2" class="w-3.5 h-3.5"></i>
-                            <span data-i18n="mgBadge">1-Klik Bilan Fonni Olib Tashlash & Tiniqlashtirish</span>
+                            <i data-lucide="Scissors" class="w-3.5 h-3.5"></i>
+                            <span data-i18n="mgBadge">Asosiy Qismni Ajratish • 100% Fonni Olib Tashlash</span>
                         </span>
                         <h2 data-i18n="mgTitle" class="text-xl sm:text-2xl font-extrabold text-white">
-                            AI Magic Studio: Fonni Tozalash va 4K Sifatga Oshirish
+                            AI Magic Studio: Rasmdagi Ob'yektni Qoldirib, Fonni To'liq Kesish
                         </h2>
                         <p data-i18n="mgDesc" class="text-xs sm:text-sm text-slate-300">
-                            Rasm fonini 1 sekundda olib tashlang, shaffof qiling yoki yangi neon fon qo'ying.
+                            Mahsulot, kiyim, uy hayvoni yoki inson rasmini yuklang — orqa fon to'liqonli olib tashlanib, asosiy detal shaffof PNG holatida ajratiladi.
                         </p>
                     </div>
 
-                    <button onclick="loadSampleMagicImage()" class="px-3.5 py-1.5 rounded-xl bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/40 text-violet-200 text-xs font-bold shrink-0">
-                        🧑 Namuna Portretni Sinash
-                    </button>
+                    <div class="bg-space-950 border border-violet-500/20 rounded-2xl p-3 shrink-0 space-y-1.5">
+                        <span class="text-[11px] font-bold text-violet-300 uppercase block">⚡ Sinov Uchun Namunalar:</span>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="loadSampleMagicImage('product')" class="px-2.5 py-1 rounded-xl bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 text-xs font-semibold transition">📦 Mahsulot (Krossovka)</button>
+                            <button onclick="loadSampleMagicImage('pet')" class="px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 text-xs font-semibold transition">🐱 Uy Hayvoni</button>
+                            <button onclick="loadSampleMagicImage('person')" class="px-2.5 py-1 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-200 text-xs font-semibold transition">🧑 Inson Portreti</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     <!-- Controls -->
                     <div class="lg:col-span-5 bg-space-950 border border-violet-500/20 rounded-2xl p-5 space-y-4">
                         <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-300 uppercase block">1. Rasm Tanlang:</label>
+                            <label class="text-xs font-bold text-slate-300 uppercase block">1. Rasm Yuklang:</label>
                             <div onclick="document.getElementById('magicFileInput').click()" class="border-2 border-dashed border-violet-500/40 hover:border-violet-400 rounded-2xl p-6 text-center cursor-pointer bg-space-950 hover:bg-violet-500/5 transition">
                                 <input type="file" id="magicFileInput" class="hidden" accept="image/*" onchange="handleMagicFileSelect(this.files)" />
                                 <i data-lucide="ImagePlus" class="w-8 h-8 text-violet-400 mx-auto mb-2"></i>
-                                <p class="text-xs font-bold text-white">Rasm yuklash uchun bosing</p>
+                                <p class="text-xs font-bold text-white">Rasm tanlash uchun bosing yoki shu yerga tashlang</p>
+                                <p class="text-[11px] text-slate-400 mt-1">Mahsulot, hayvon yoki inson fotosuratlari</p>
                             </div>
                         </div>
 
-                        <!-- Background Replacement Selector -->
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-300 uppercase block">2. Yangi Fon Uslubi:</label>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <button onclick="setMagicBgStyle('transparent')" id="bgBtn_transparent" class="px-3 py-2 rounded-xl bg-violet-600 text-white font-bold border border-violet-400">Shaffof (PNG)</button>
-                                <button onclick="setMagicBgStyle('neon')" id="bgBtn_neon" class="px-3 py-2 rounded-xl bg-space-900 text-slate-300 font-semibold border border-white/10">Kiber Neon</button>
-                                <button onclick="setMagicBgStyle('dark')" id="bgBtn_dark" class="px-3 py-2 rounded-xl bg-space-900 text-slate-300 font-semibold border border-white/10">Studiya Qora</button>
-                                <button onclick="setMagicBgStyle('white')" id="bgBtn_white" class="px-3 py-2 rounded-xl bg-space-900 text-slate-300 font-semibold border border-white/10">Toza Oq</button>
+                        <div class="p-4 rounded-2xl bg-violet-500/10 border border-violet-500/30 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-500 to-rose-600 flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/20">
+                                <i data-lucide="Scissors" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">Toza Qirqish Algoritmi</h4>
+                                <p class="text-[11px] text-violet-200/80">Keraksiz orqa qismlar tashlab yuborilib, ob'yektning o'zi 100% toza qirqib olinadi</p>
                             </div>
                         </div>
 
-                        <button onclick="executeBackgroundRemoval()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-violet-600 to-rose-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-violet-600/30 transition">
+                        <button onclick="executeBackgroundRemoval()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-violet-600 to-rose-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-violet-600/30 transition cursor-pointer">
                             <i data-lucide="Scissors" class="w-4 h-4"></i>
-                            <span data-i18n="mgRemoveBgBtn">✂️ Fonni 1 Sekundda Tozalash</span>
+                            <span data-i18n="mgRemoveBgBtn">✂️ Fonni 100% Tozalash va Ajratish</span>
                         </button>
                     </div>
 
                     <!-- Output Canvas Stage -->
                     <div class="lg:col-span-7 bg-space-950 border border-violet-500/20 rounded-2xl p-5 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono font-bold text-violet-300">Toza Qirqilgan Natija:</span>
-                            <button onclick="downloadMagicResult()" class="px-3.5 py-1.5 rounded-xl bg-violet-500 hover:bg-violet-400 text-black text-xs font-extrabold flex items-center gap-1.5 shadow-lg transition">
-                                <i data-lucide="Download" class="w-4 h-4"></i>
-                                <span data-i18n="mgDownloadPng">Tiniq PNG Yuklab Olish</span>
-                            </button>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span id="magicStatusText" class="text-xs font-mono font-bold text-violet-300">Qirqilgan Ob'yekt (Shaffof Fon):</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="downloadMagicResult('png')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-rose-500 hover:opacity-90 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-lg transition cursor-pointer">
+                                    <i data-lucide="Download" class="w-4 h-4"></i>
+                                    <span>📥 Shaffof PNG Yuklab Olish</span>
+                                </button>
+                                <button onclick="downloadMagicResult('white')" class="px-3 py-1.5 rounded-xl bg-space-900 hover:bg-space-800 border border-white/20 text-slate-200 text-xs font-bold flex items-center gap-1 transition cursor-pointer" title="Oq fon bilan yuklash">
+                                    <span>⚪ Oq Fon</span>
+                                </button>
+                                <button onclick="downloadMagicResult('black')" class="px-3 py-1.5 rounded-xl bg-space-900 hover:bg-space-800 border border-white/20 text-slate-200 text-xs font-bold flex items-center gap-1 transition cursor-pointer" title="Qora fon bilan yuklash">
+                                    <span>⚫ Qora Fon</span>
+                                </button>
+                            </div>
                         </div>
-                        <div class="rounded-xl overflow-hidden bg-space-900 border border-white/10 flex items-center justify-center min-h-[300px] p-2 relative">
+                        <div class="rounded-xl overflow-hidden border border-white/10 flex items-center justify-center min-h-[320px] p-3 relative" style="background-image: repeating-conic-gradient(#1e293b 0% 25%, #0f172a 0% 50%); background-size: 20px 20px;">
                             <canvas id="magicResultCanvas" class="max-h-80 w-auto rounded-lg shadow-2xl"></canvas>
                         </div>
                     </div>
@@ -2731,22 +2747,11 @@
         }
 
         // =============================================================
-        // FEATURE 5: AI MAGIC STUDIO (Background Remover - IDEA 1)
+        // =============================================================
+        // FEATURE 5: AI MAGIC STUDIO (Pure 100% Subject Cutout & Bg Eraser)
         // =============================================================
         let currentMagicImg = null;
-        let currentMagicBgStyle = 'transparent';
-
-        function setMagicBgStyle(style) {
-            currentMagicBgStyle = style;
-            ['transparent', 'neon', 'dark', 'white'].forEach(s => {
-                const btn = document.getElementById('bgBtn_' + s);
-                if (btn) {
-                    if (s === style) btn.className = 'px-3 py-2 rounded-xl bg-violet-600 text-white font-bold border border-violet-400';
-                    else btn.className = 'px-3 py-2 rounded-xl bg-space-900 text-slate-300 font-semibold border border-white/10';
-                }
-            });
-            if (currentMagicImg) executeBackgroundRemoval();
-        }
+        let currentCutoutCanvas = null;
 
         function handleMagicFileSelect(files) {
             if (!files || !files[0]) return;
@@ -2762,37 +2767,56 @@
             reader.readAsDataURL(files[0]);
         }
 
-        function loadSampleMagicImage() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 600; canvas.height = 600;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 600, 600); // white background
-            // Subject
-            ctx.fillStyle = '#8b5cf6'; ctx.beginPath(); ctx.ellipse(300, 340, 130, 160, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#fed7aa'; ctx.beginPath(); ctx.ellipse(300, 240, 90, 110, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.ellipse(265, 235, 12, 16, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.ellipse(335, 235, 12, 16, 0, 0, Math.PI * 2); ctx.fill();
+        function loadSampleMagicImage(type = 'product') {
+            showToast('Namuna rasm yuklanmoqda...', 'info');
+            const sampleUrls = {
+                product: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=85',
+                pet: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=700&q=85',
+                person: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=85'
+            };
 
+            const url = sampleUrls[type] || sampleUrls.product;
             const img = new Image();
+            img.crossOrigin = 'anonymous';
             img.onload = () => {
                 currentMagicImg = img;
                 executeBackgroundRemoval();
             };
-            img.src = canvas.toDataURL('image/png');
+            img.onerror = () => {
+                showToast('Namuna rasmini yuklab bo\'lmadi, o\'z rasmingizni yuklang', 'error');
+            };
+            img.src = url;
         }
 
-                async function executeBackgroundRemoval() {
-            if (!currentMagicImg) { loadSampleMagicImage(); return; }
-            showToast('✂️ Google MediaPipe AI fonni 100% tozalamoqda...', 'info');
+        async function executeBackgroundRemoval() {
+            if (!currentMagicImg) { loadSampleMagicImage('product'); return; }
+            showToast('✂️ Rasmdagi asosiy ob\'yekt ajratilib, fon 100% tozalanmoqda...', 'info');
+            const statusEl = document.getElementById('magicStatusText');
+            if (statusEl) statusEl.textContent = '✂️ AI Fon Tozalanmoqda...';
 
             const canvas = document.getElementById('magicResultCanvas');
-            canvas.width = currentMagicImg.naturalWidth || 600;
-            canvas.height = currentMagicImg.naturalHeight || 600;
+            const maxDim = 800;
+            let targetW = currentMagicImg.naturalWidth || 600;
+            let targetH = currentMagicImg.naturalHeight || 600;
+
+            if (targetW > maxDim || targetH > maxDim) {
+                if (targetW > targetH) {
+                    targetH = Math.round((targetH * maxDim) / targetW);
+                    targetW = maxDim;
+                } else {
+                    targetW = Math.round((targetW * maxDim) / targetH);
+                    targetH = maxDim;
+                }
+            }
+
+            canvas.width = targetW;
+            canvas.height = targetH;
             const ctx = canvas.getContext('2d');
 
-            // Strategy 1: Google MediaPipe SelfieSegmentation WebAssembly
+            // Strategy 1: Google MediaPipe SelfieSegmentation (Human portrait detection)
             if (window.SelfieSegmentation) {
                 try {
+                    let hasHumanSegment = false;
                     if (!window.omniSelfieSeg) {
                         window.omniSelfieSeg = new SelfieSegmentation({
                             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
@@ -2800,96 +2824,199 @@
                         window.omniSelfieSeg.setOptions({ modelSelection: 1 });
                     }
 
-                    window.omniSelfieSeg.onResults((results) => {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                        // 1. Draw new chosen background
-                        if (currentMagicBgStyle === 'neon') {
-                            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                            grad.addColorStop(0, '#8b5cf6'); grad.addColorStop(1, '#00f2fe');
-                            ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        } else if (currentMagicBgStyle === 'dark') {
-                            ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        } else if (currentMagicBgStyle === 'white') {
-                            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        }
-
-                        // 2. Draw segmented subject with antialiased mask
-                        ctx.save();
-                        ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
-                        ctx.globalCompositeOperation = 'source-in';
-                        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-                        ctx.restore();
-
-                        showToast('Fon 100% muvaffaqiyatli olib tashlandi!', 'success');
+                    const segPromise = new Promise((resolve) => {
+                        window.omniSelfieSeg.onResults((results) => {
+                            if (results && results.segmentationMask) {
+                                // Check if mask has meaningful coverage
+                                const testC = document.createElement('canvas');
+                                testC.width = 100; testC.height = 100;
+                                const tCtx = testC.getContext('2d');
+                                tCtx.drawImage(results.segmentationMask, 0, 0, 100, 100);
+                                const tData = tCtx.getImageData(0, 0, 100, 100).data;
+                                let whitePixels = 0;
+                                for (let i = 0; i < tData.length; i += 4) {
+                                    if (tData[i] > 100) whitePixels++;
+                                }
+                                if (whitePixels > 250 && whitePixels < 9500) {
+                                    // Valid human segmentation!
+                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                    ctx.save();
+                                    ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+                                    ctx.globalCompositeOperation = 'source-in';
+                                    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+                                    ctx.restore();
+                                    hasHumanSegment = true;
+                                    resolve(true);
+                                    return;
+                                }
+                            }
+                            resolve(false);
+                        });
                     });
 
-                    await window.omniSelfieSeg.send({ image: currentMagicImg });
-                    return;
+                    window.omniSelfieSeg.send({ image: currentMagicImg });
+                    const isHumanOk = await Promise.race([
+                        segPromise,
+                        new Promise(r => setTimeout(() => r(false), 2000))
+                    ]);
+
+                    if (isHumanOk) {
+                        if (statusEl) statusEl.textContent = '✅ Ob\'yekt Ajratildi (Shaffof Fon)';
+                        showToast('Fon 100% muvaffaqiyatli olib tashlandi!', 'success');
+                        currentCutoutCanvas = canvas;
+                        return;
+                    }
                 } catch(err) {
-                    console.warn('MediaPipe error, falling back to multi-edge mask:', err);
+                    console.warn('MediaPipe skipped, executing multi-anchor BFS cutout:', err);
                 }
             }
 
-            // Strategy 2: Multi-edge flood fill & luminance boundary segmentation fallback
-            applyMultiEdgeCutout(currentMagicImg, canvas, ctx);
+            // Strategy 2: Multi-Anchor BFS Boundary & Saliency Cutout (For Products, Pets & Objects)
+            applyUniversalSubjectCutout(currentMagicImg, canvas, ctx, targetW, targetH);
         }
 
-        function applyMultiEdgeCutout(img, canvas, ctx) {
-            const w = canvas.width, h = canvas.height;
-            const tempC = document.createElement('canvas');
-            tempC.width = w; tempC.height = h;
-            const tCtx = tempC.getContext('2d');
-            tCtx.drawImage(img, 0, 0);
+        function applyUniversalSubjectCutout(img, canvas, ctx, w, h) {
+            const offC = document.createElement('canvas');
+            offC.width = w; offC.height = h;
+            const offCtx = offC.getContext('2d');
+            offCtx.drawImage(img, 0, 0, w, h);
 
-            const imgData = tCtx.getImageData(0, 0, w, h);
+            const imgData = offCtx.getImageData(0, 0, w, h);
             const data = imgData.data;
 
-            // Sample 4 corners and borders for adaptive background color
-            const corners = [
-                0, (w - 1) * 4,
-                ((h - 1) * w) * 4, ((h - 1) * w + (w - 1)) * 4
-            ];
-            let avgR = 0, avgG = 0, avgB = 0;
-            corners.forEach(idx => { avgR += data[idx]; avgG += data[idx+1]; avgB += data[idx+2]; });
-            avgR /= 4; avgG /= 4; avgB /= 4;
+            // 1. Collect perimeter background anchor colors
+            const anchors = [];
+            const step = Math.max(4, Math.floor(w / 40));
 
-            // Adaptive Euclidean thresholding for 100% full background removal
-            for (let i = 0; i < data.length; i += 4) {
-                const dist = Math.sqrt(
-                    Math.pow(data[i] - avgR, 2) + 
-                    Math.pow(data[i+1] - avgG, 2) + 
-                    Math.pow(data[i+2] - avgB, 2)
-                );
-                // Also remove near-white and near-black studio backdrops
-                const isNearWhite = data[i] > 230 && data[i+1] > 230 && data[i+2] > 230;
-                const isNearBlack = data[i] < 35 && data[i+1] < 35 && data[i+2] < 35;
-                if (dist < 68 || isNearWhite || isNearBlack) {
-                    data[i+3] = 0; // 100% transparent
+            for (let x = 0; x < w; x += step) {
+                const t = x * 4;
+                const b = ((h - 1) * w + x) * 4;
+                anchors.push([data[t], data[t+1], data[t+2]]);
+                anchors.push([data[b], data[b+1], data[b+2]]);
+            }
+            for (let y = 0; y < h; y += step) {
+                const l = (y * w) * 4;
+                const r = (y * w + w - 1) * 4;
+                anchors.push([data[l], data[l+1], data[l+2]]);
+                anchors.push([data[r], data[r+1], data[r+2]]);
+            }
+
+            // 2. BFS Flood-Fill from all 4 boundaries
+            const isBg = new Uint8Array(w * h);
+            const queue = new Int32Array(w * h);
+            let head = 0;
+            let tail = 0;
+
+            // Push border pixels
+            for (let x = 0; x < w; x++) {
+                isBg[x] = 1; queue[tail++] = x;
+                isBg[(h - 1) * w + x] = 1; queue[tail++] = (h - 1) * w + x;
+            }
+            for (let y = 0; y < h; y++) {
+                isBg[y * w] = 1; queue[tail++] = y * w;
+                isBg[y * w + w - 1] = 1; queue[tail++] = y * w + w - 1;
+            }
+
+            const threshold = 52; // Adaptive color tolerance
+
+            while (head < tail) {
+                const curr = queue[head++];
+                const cx = curr % w;
+                const cy = (curr / w) | 0;
+
+                const nList = [curr - 1, curr + 1, curr - w, curr + w];
+                for (let i = 0; i < 4; i++) {
+                    const nIdx = nList[i];
+                    if (nIdx >= 0 && nIdx < w * h && !isBg[nIdx]) {
+                        const nx = nIdx % w;
+                        if (Math.abs(nx - cx) > 1) continue; // Wrap prevention
+
+                        const pIdx = nIdx * 4;
+                        const pr = data[pIdx];
+                        const pg = data[pIdx + 1];
+                        const pb = data[pIdx + 2];
+
+                        // Match against closest background anchor
+                        let minDist = Infinity;
+                        for (let a = 0; a < anchors.length; a += 3) {
+                            const anc = anchors[a];
+                            const d = Math.abs(pr - anc[0]) + Math.abs(pg - anc[1]) + Math.abs(pb - anc[2]);
+                            if (d < minDist) {
+                                minDist = d;
+                                if (d < threshold) break;
+                            }
+                        }
+
+                        if (minDist < threshold) {
+                            isBg[nIdx] = 1;
+                            queue[tail++] = nIdx;
+                        }
+                    }
                 }
             }
-            tCtx.putImageData(imgData, 0, 0);
+
+            // 3. Apply alpha mask with edge antialiasing (feathering)
+            for (let y = 0; y < h; y++) {
+                const row = y * w;
+                for (let x = 0; x < w; x++) {
+                    const idx = row + x;
+                    const pIdx = idx * 4;
+
+                    if (isBg[idx]) {
+                        data[pIdx + 3] = 0; // 100% transparent background
+                    } else {
+                        // Check if pixel borders a background pixel for soft edge
+                        const isBorder = (
+                            (x > 0 && isBg[idx - 1]) ||
+                            (x < w - 1 && isBg[idx + 1]) ||
+                            (y > 0 && isBg[idx - w]) ||
+                            (y < h - 1 && isBg[idx + w])
+                        );
+                        data[pIdx + 3] = isBorder ? 175 : 255;
+                    }
+                }
+            }
 
             ctx.clearRect(0, 0, w, h);
-            if (currentMagicBgStyle === 'neon') {
-                const grad = ctx.createLinearGradient(0, 0, w, h);
-                grad.addColorStop(0, '#8b5cf6'); grad.addColorStop(1, '#00f2fe');
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
-            } else if (currentMagicBgStyle === 'dark') {
-                ctx.fillStyle = '#0b0f19'; ctx.fillRect(0, 0, w, h);
-            } else if (currentMagicBgStyle === 'white') {
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
-            }
-            ctx.drawImage(tempC, 0, 0);
-            showToast('Fon 100% muvaffaqiyatli olib tashlandi!', 'success');
+            ctx.putImageData(imgData, 0, 0);
+
+            const statusEl = document.getElementById('magicStatusText');
+            if (statusEl) statusEl.textContent = '✅ Ob\'yekt Ajratildi (Shaffof Fon)';
+            showToast('Orqa fon 100% tozalab olib tashlandi!', 'success');
+            currentCutoutCanvas = canvas;
         }
 
-        function downloadMagicResult() {
+        function downloadMagicResult(format = 'png') {
             const canvas = document.getElementById('magicResultCanvas');
+            if (!canvas || canvas.width === 0) {
+                showToast('Avval rasm yuklang yoki namunani tanlang!', 'info');
+                return;
+            }
+
             const a = document.createElement('a');
-            a.href = canvas.toDataURL('image/png');
-            a.download = `OmniMagic_Cutout_${Date.now()}.png`;
+
+            if (format === 'white' || format === 'black') {
+                const outC = document.createElement('canvas');
+                outC.width = canvas.width;
+                outC.height = canvas.height;
+                const outCtx = outC.getContext('2d');
+
+                outCtx.fillStyle = format === 'white' ? '#ffffff' : '#0b0f19';
+                outCtx.fillRect(0, 0, outC.width, outC.height);
+                outCtx.drawImage(canvas, 0, 0);
+
+                a.href = outC.toDataURL('image/jpeg', 0.95);
+                a.download = `OmniSuper_${format === 'white' ? 'White' : 'Dark'}_Bg_${Date.now()}.jpg`;
+                showToast(`${format === 'white' ? 'Oq' : 'Qora'} fonli rasm yuklab olindi!`, 'success');
+            } else {
+                a.href = canvas.toDataURL('image/png');
+                a.download = `OmniSuper_Cutout_Transparent_${Date.now()}.png`;
+                showToast('Shaffof PNG muvaffaqiyatli yuklab olindi!', 'success');
+            }
+
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
         }
 
                 // =============================================================
