@@ -1952,7 +1952,7 @@
             showToast('Video qurilmangizga yuklanmoqda...', 'info');
 
             const ext = currentUrlMedia.isImage ? 'jpg' : (currentUrlMedia.isAudio ? 'mp3' : 'mp4');
-            const cleanTitle = (currentUrlMedia.title || 'OmniSuper_Video').replace(/[^\w\.\-_]/g, '_').slice(0, 50);
+            const cleanTitle = (currentUrlMedia.title || 'OmniSuper_Video').replace(/[^\w\.\-_]/g, '_').slice(0, 50).replace(/\.(mp4|mp3|m4a|wav|jpg|jpeg|png)$/i, '');
             const fileName = `${cleanTitle}.${ext}`;
 
             // Strategy 1: Direct Fetch to Blob (Instant local file save)
@@ -2009,7 +2009,7 @@
             if (!currentUrlMedia) return;
             showToast('Musiqa (MP3/WAV) yuklanmoqda...', 'info');
 
-            const cleanTitle = (currentUrlMedia.title || 'OmniSuper_Musiqa').replace(/[^\w\.\-_]/g, '_').slice(0, 50);
+            const cleanTitle = (currentUrlMedia.title || 'OmniSuper_Musiqa').replace(/[^\w\.\-_]/g, '_').slice(0, 50).replace(/\.(mp4|mp3|m4a|wav|jpg|jpeg|png)$/i, '');
 
             // CASE 1: Audio stream directly available (e.g. from TikTok music or MP3 URL)
             const audioSrc = currentUrlMedia.audioUrl || (currentUrlMedia.isAudio ? currentUrlMedia.url : null);
