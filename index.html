@@ -1116,13 +1116,13 @@
         // =============================================================
         let fileQueue = [];
         const FORMAT_TARGETS = {
-            xlsx: ['pdf', 'csv', 'html', 'json', 'txt', 'doc'],
-            xls:  ['xlsx', 'pdf', 'csv', 'html', 'json', 'txt', 'doc'],
-            csv:  ['xlsx', 'pdf', 'html', 'json', 'txt', 'doc'],
+            xlsx: ['pdf', 'docx', 'csv', 'html', 'json', 'txt', 'doc'],
+            xls:  ['pdf', 'docx', 'xlsx', 'csv', 'html', 'json', 'txt', 'doc'],
+            csv:  ['xlsx', 'docx', 'pdf', 'html', 'json', 'txt', 'doc'],
             json: ['xlsx', 'csv', 'pdf', 'html', 'txt'],
-            docx: ['pdf', 'doc', 'xlsx', 'html', 'txt', 'png', 'jpg'],
-            doc:  ['pdf', 'xlsx', 'html', 'txt', 'png', 'jpg'],
-            pdf:  ['docx', 'doc', 'xlsx', 'txt', 'html', 'jpg', 'png'],
+            docx: ['pdf', 'xlsx', 'doc', 'html', 'txt', 'png', 'jpg'],
+            doc:  ['pdf', 'docx', 'xlsx', 'html', 'txt', 'png', 'jpg'],
+            pdf:  ['docx', 'xlsx', 'doc', 'txt', 'html', 'jpg', 'png'],
             jpg:  ['pdf', 'png', 'webp', 'doc', 'html'],
             jpeg: ['pdf', 'png', 'webp', 'doc', 'html'],
             png:  ['pdf', 'jpg', 'webp', 'doc', 'html'],
@@ -1267,25 +1267,67 @@
             const file = item.file;
             const ext = item.ext;
 
+            // 1. EXCEL / SPREADSHEETS (xlsx, xls, csv) - 100% Data Fidelity
             if (['xlsx', 'xls', 'csv'].includes(ext)) {
                 const buffer = await file.arrayBuffer();
-                const wb = XLSX.read(buffer, { type: 'array' });
-                const firstSheet = wb.Sheets[wb.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
-                const html = XLSX.utils.sheet_to_html(firstSheet);
-                const csv = XLSX.utils.sheet_to_csv(firstSheet);
-                item.extractedData = { type: 'table', wb, rows, html, text: csv };
+                const wb = XLSX.read(buffer, { type: 'array', cellDates: true, cellNF: true });
+                const sheets = [];
+                wb.SheetNames.forEach(sheetName => {
+                    const sheet = wb.Sheets[sheetName];
+                    // raw: false ensures formatted values (dates, currencies, percentages) are preserved!
+                    const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
+                    // Remove completely blank trailing rows
+                    const rows = rawRows.filter(r => r && r.some(c => String(c).trim() !== ''));
+                    const html = XLSX.utils.sheet_to_html(sheet);
+                    sheets.push({ name: sheetName, rows, html });
+                });
+                const firstSheet = sheets[0] || { name: 'Sheet1', rows: [], html: '' };
+                item.extractedData = {
+                    type: 'table',
+                    wb,
+                    sheets,
+                    rows: firstSheet.rows,
+                    html: firstSheet.html,
+                    text: XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]])
+                };
                 return item.extractedData;
             }
 
+            // 2. WORD DOCUMENT (docx) - Extracts Headings, Tables, Paragraphs & Embedded Images
             if (ext === 'docx') {
                 const buffer = await file.arrayBuffer();
                 const htmlRes = await mammoth.convertToHtml({ arrayBuffer: buffer });
                 const textRes = await mammoth.extractRawText({ arrayBuffer: buffer });
-                item.extractedData = { type: 'document', html: htmlRes.value, text: textRes.value };
+                
+                // Parse table cells if docx has structured tables
+                let rows = [];
+                try {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlRes.value;
+                    const table = tempDiv.querySelector('table');
+                    if (table) {
+                        const trs = table.querySelectorAll('tr');
+                        trs.forEach(tr => {
+                            const cells = Array.from(tr.querySelectorAll('th, td')).map(c => c.textContent.trim());
+                            if (cells.length) rows.push(cells);
+                        });
+                    }
+                } catch(e){}
+
+                if (!rows.length) {
+                    rows = textRes.value.split(/\r?\n/).filter(l => l.trim()).map(l => [l.trim()]);
+                }
+
+                item.extractedData = {
+                    type: 'document',
+                    html: htmlRes.value,
+                    text: textRes.value,
+                    rows: rows
+                };
                 return item.extractedData;
             }
 
+            // 3. TEXT / DOC / HTML / JSON
             if (['doc', 'txt', 'html', 'json'].includes(ext)) {
                 const text = await file.text();
                 if (ext === 'json') {
@@ -1303,37 +1345,93 @@
                 item.extractedData = {
                     type: 'document',
                     text: text.replace(/<[^>]+>/g, ' '),
-                    html: ext === 'html' || ext === 'doc' ? text : `<pre style="white-space:pre-wrap;">${text}</pre>`
+                    html: ext === 'html' || ext === 'doc' ? text : `<pre style="white-space:pre-wrap;font-family:inherit;">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`
                 };
                 return item.extractedData;
             }
 
+            // 4. PDF (pdf) - Line-Grouped Spatial Parsing (No Fake Page Headers or Artifacts)
             if (ext === 'pdf') {
                 const buffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
                 let fullText = '';
                 let pagesHtml = '';
+                let allRows = [];
+
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const txtContent = await page.getTextContent();
-                    const pageTxt = txtContent.items.map(it => it.str).join(' ');
-                    fullText += `--- Sahifa ${i} ---\n${pageTxt}\n\n`;
-                    pagesHtml += `<div style="page-break-after:always;padding:16px 0;border-bottom:1px solid #e2e8f0;margin-bottom:16px;">
-                        <h3 style="color:#1d4ed8;font-size:13pt;font-weight:bold;margin-bottom:8px;">Sahifa ${i}</h3>
-                        <p style="font-size:11pt;line-height:1.6;color:#1e293b;white-space:pre-wrap;">${pageTxt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
-                    </div>`;
+                    const items = txtContent.items || [];
+                    
+                    // Sort vertically top-to-bottom, then horizontally left-to-right
+                    const sorted = [...items].sort((a,b) => (b.transform[5] - a.transform[5]) || (a.transform[4] - b.transform[4]));
+                    
+                    let currentY = null;
+                    let currentLine = [];
+                    const pageLines = [];
+
+                    for (const it of sorted) {
+                        const y = Math.round(it.transform[5]);
+                        if (currentY === null || Math.abs(currentY - y) > 4) {
+                            if (currentLine.length) pageLines.push(currentLine);
+                            currentY = y;
+                            currentLine = [it];
+                        } else {
+                            currentLine.push(it);
+                        }
+                    }
+                    if (currentLine.length) pageLines.push(currentLine);
+
+                    // Sort items on each line left-to-right by x coordinate
+                    const pageRows = pageLines.map(line => {
+                        return line.sort((a,b) => a.transform[4] - b.transform[4]).map(it => it.str.trim()).filter(Boolean);
+                    }).filter(r => r.length > 0);
+
+                    // Accumulate clean rows without any injected headers
+                    pageRows.forEach(row => {
+                        allRows.push(row);
+                        fullText += row.join('  ') + '\n';
+                    });
+
+                    // Build clean HTML structure
+                    const isTableLike = pageRows.length > 0 && pageRows.some(r => r.length > 1);
+                    if (isTableLike) {
+                        let tHtml = '<table style="border-collapse:collapse;width:100%;margin-bottom:14pt;">';
+                        pageRows.forEach((r, rIdx) => {
+                            const isHdr = rIdx === 0;
+                            tHtml += `<tr style="${isHdr ? 'background:#f8fafc;font-weight:bold;' : ''}">`;
+                            r.forEach(c => {
+                                tHtml += `<td style="border:1px solid #cbd5e1;padding:5pt 8pt;font-size:10pt;">${c.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`;
+                            });
+                            tHtml += '</tr>';
+                        });
+                        tHtml += '</table>';
+                        pagesHtml += tHtml;
+                    } else {
+                        pageRows.forEach(r => {
+                            pagesHtml += `<p style="font-size:11pt;line-height:1.6;margin-bottom:8pt;color:#1e293b;">${r.join(' ').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`;
+                        });
+                    }
                 }
-                item.extractedData = { type: 'pdf', text: fullText, html: pagesHtml, numPages: pdf.numPages };
+
+                item.extractedData = {
+                    type: 'pdf',
+                    text: fullText.trim(),
+                    html: pagesHtml,
+                    rows: allRows,
+                    numPages: pdf.numPages
+                };
                 return item.extractedData;
             }
 
+            // 5. IMAGE (jpg, png, webp)
             if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
                 const dataUrl = await new Promise(res => {
                     const reader = new FileReader();
                     reader.onload = () => res(reader.result);
                     reader.readAsDataURL(file);
                 });
-                item.extractedData = { type: 'image', dataUrl, html: `<img src="${dataUrl}" class="max-w-full h-auto rounded-lg" />`, text: `[Rasm: ${item.name}]` };
+                item.extractedData = { type: 'image', dataUrl, html: `<img src="${dataUrl}" class="max-w-full h-auto rounded-lg" />`, text: '' };
                 return item.extractedData;
             }
 
@@ -1358,17 +1456,36 @@
                 const target = item.targetFormat;
                 let outBlob = null;
 
+                // =========================================================
+                // TARGET 1: EXCEL (.xlsx / .csv)
+                // =========================================================
                 if (target === 'xlsx' || target === 'csv') {
                     let wb = data.wb;
                     if (!wb) {
                         wb = XLSX.utils.book_new();
-                        let rows = data.rows;
-                        if (!rows || !rows.length) {
-                            const lines = (data.text || '').split(/\r?\n/).filter(Boolean);
-                            rows = lines.map(l => l.split(/\t|;|,/));
+                        let sheetCreated = false;
+                        if (data.html && data.html.includes('<table')) {
+                            try {
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = data.html;
+                                const table = tempDiv.querySelector('table');
+                                if (table) {
+                                    const ws = XLSX.utils.table_to_sheet(table);
+                                    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+                                    sheetCreated = true;
+                                }
+                            } catch(e){}
                         }
-                        const ws = XLSX.utils.aoa_to_sheet(rows && rows.length ? rows : [['Fayl', item.name]]);
-                        XLSX.utils.book_append_sheet(wb, ws, 'Manba');
+                        if (!sheetCreated) {
+                            let rows = data.rows;
+                            if (!rows || !rows.length) {
+                                const lines = (data.text || '').split(/\r?\n/).filter(Boolean);
+                                rows = lines.map(l => l.split(/\t|;|,|\s{2,}/));
+                            }
+                            const cleanRows = (rows && rows.length) ? rows : [['']];
+                            const ws = XLSX.utils.aoa_to_sheet(cleanRows);
+                            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+                        }
                     }
                     if (target === 'xlsx') {
                         const outBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -1379,58 +1496,185 @@
                         outBlob = new Blob(['\uFEFF' + csvText], { type: 'text/csv;charset=utf-8' });
                     }
                 }
+
+                // =========================================================
+                // TARGET 2: PDF (.pdf) - 100% Fidelity (No Added Titles/Junk)
+                // =========================================================
                 else if (target === 'pdf') {
                     const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
 
+                    // CASE A: EXCEL SPREADSHEET TABLE TO PDF
                     if (data.type === 'table' && data.rows && data.rows.length > 0) {
-                        doc.setFontSize(12);
-                        doc.text(item.baseName, 40, 35);
-                        doc.autoTable({ head: [data.rows[0]], body: data.rows.slice(1), startY: 50, styles: { fontSize: 9, cellPadding: 5 } });
-                    } else if (data.type === 'image' && data.dataUrl) {
-                        const imgProps = doc.getImageProperties(data.dataUrl);
-                        const pdfW = doc.internal.pageSize.getWidth() - 60;
-                        const pdfH = Math.min((imgProps.height * pdfW) / imgProps.width, 740);
-                        doc.addImage(data.dataUrl, 'PNG', 30, 30, pdfW, pdfH);
-                    } else {
-                        doc.setFontSize(14);
-                        doc.text(item.baseName, 40, 40);
-                        doc.setFontSize(10);
-                        const clean = (data.text || '').slice(0, 8000);
-                        const split = doc.splitTextToSize(clean, 515);
-                        doc.text(split, 40, 65);
+                        const sheetsToRender = (data.sheets && data.sheets.length > 0) ? data.sheets : [{ name: 'Sheet1', rows: data.rows }];
+                        
+                        let maxCols = 1;
+                        sheetsToRender.forEach(s => {
+                            (s.rows || []).forEach(r => { if (r && r.length > maxCols) maxCols = r.length; });
+                        });
+
+                        // Dynamic Landscape if > 6 columns to prevent numbers wrapping/distortion
+                        const orientation = maxCols > 6 ? 'l' : 'p';
+                        const doc = new jsPDF({ orientation: orientation, unit: 'pt', format: 'a4' });
+
+                        sheetsToRender.forEach((sheetObj, sIdx) => {
+                            const sheetRows = sheetObj.rows || [];
+                            if (!sheetRows.length) return;
+                            if (sIdx > 0) doc.addPage('a4', orientation);
+
+                            const normalized = sheetRows.map(r => {
+                                const row = r ? [...r] : [];
+                                while (row.length < maxCols) row.push('');
+                                return row.map(v => (v === null || v === undefined) ? '' : String(v));
+                            });
+
+                            const fontSize = maxCols > 14 ? 6 : (maxCols > 9 ? 7.5 : (maxCols > 5 ? 8.5 : 9.5));
+                            const cellPadding = maxCols > 14 ? 2 : (maxCols > 9 ? 3 : 4);
+
+                            doc.autoTable({
+                                body: normalized,
+                                theme: 'grid',
+                                startY: 20,
+                                margin: { top: 20, right: 20, bottom: 20, left: 20 },
+                                styles: {
+                                    font: 'helvetica',
+                                    fontSize: fontSize,
+                                    cellPadding: cellPadding,
+                                    textColor: [30, 41, 59],
+                                    lineColor: [209, 213, 219],
+                                    lineWidth: 0.5,
+                                    overflow: 'linebreak'
+                                },
+                                didParseCell: function(dataHook) {
+                                    if (dataHook.row.index === 0) {
+                                        dataHook.cell.styles.fillColor = [241, 245, 249];
+                                        dataHook.cell.styles.fontStyle = 'bold';
+                                        dataHook.cell.styles.textColor = [15, 23, 42];
+                                    }
+                                    const rawVal = String(dataHook.cell.raw || '').trim();
+                                    if (/^[-+]?\$?\d+([.,]\d+)?\s*[%$€]?$/.test(rawVal)) {
+                                        dataHook.cell.styles.halign = 'right';
+                                    }
+                                }
+                            });
+                        });
+
+                        outBlob = doc.output('blob');
                     }
-                    outBlob = doc.output('blob');
+
+                    // CASE B: WORD DOCUMENT / HTML TO PDF (With Images & Full Formatting)
+                    else if ((data.type === 'document' || data.type === 'pdf') && data.html) {
+                        const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+                        const container = document.createElement('div');
+                        container.style.width = '555pt';
+                        container.style.padding = '24pt';
+                        container.style.fontFamily = 'Calibri, Arial, sans-serif';
+                        container.style.color = '#1e293b';
+                        container.style.fontSize = '11pt';
+                        container.style.lineHeight = '1.6';
+                        container.style.backgroundColor = '#ffffff';
+                        container.innerHTML = data.html;
+                        document.body.appendChild(container);
+
+                        outBlob = await new Promise(resolve => {
+                            try {
+                                doc.html(container, {
+                                    callback: function(pdf) {
+                                        try { document.body.removeChild(container); } catch(e){}
+                                        resolve(pdf.output('blob'));
+                                    },
+                                    x: 20,
+                                    y: 20,
+                                    width: 555,
+                                    windowWidth: 800,
+                                    autoPaging: 'text'
+                                });
+                            } catch(e) {
+                                try { document.body.removeChild(container); } catch(err){}
+                                const fallbackDoc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+                                const split = fallbackDoc.splitTextToSize(data.text || '', 515);
+                                fallbackDoc.text(split, 40, 40);
+                                resolve(fallbackDoc.output('blob'));
+                            }
+                        });
+                    }
+
+                    // CASE C: IMAGE TO PDF
+                    else if (data.type === 'image' && data.dataUrl) {
+                        const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+                        const imgProps = doc.getImageProperties(data.dataUrl);
+                        const pdfW = doc.internal.pageSize.getWidth() - 40;
+                        const pdfH = Math.min((imgProps.height * pdfW) / imgProps.width, doc.internal.pageSize.getHeight() - 40);
+                        doc.addImage(data.dataUrl, 'PNG', 20, 20, pdfW, pdfH);
+                        outBlob = doc.output('blob');
+                    }
+
+                    // CASE D: RAW TEXT TO PDF
+                    else {
+                        const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+                        doc.setFontSize(10);
+                        const clean = (data.text || '').slice(0, 50000);
+                        const split = doc.splitTextToSize(clean, 515);
+                        doc.text(split, 40, 40);
+                        outBlob = doc.output('blob');
+                    }
                 }
+
+                // =========================================================
+                // TARGET 3: WORD (.docx / .doc) - Clean Document (No Added Titles)
+                // =========================================================
                 else if (target === 'docx' || target === 'doc') {
-                    const docTitle = item.baseName.replace(/[<>:"/\\|?*]+/g, ' ');
+                    let bodyContent = '';
+                    if (data.type === 'table' && data.rows && data.rows.length > 0) {
+                        let tHtml = '<table style="border-collapse:collapse;width:100%;margin-bottom:12pt;font-family:Calibri,sans-serif;font-size:10pt;">';
+                        data.rows.forEach((r, rIdx) => {
+                            const isHdr = rIdx === 0;
+                            tHtml += `<tr style="${isHdr ? 'background-color:#f1f5f9;font-weight:bold;' : ''}">`;
+                            (r || []).forEach(c => {
+                                const val = (c === null || c === undefined) ? '' : String(c);
+                                const isNum = /^[-+]?\$?\d+([.,]\d+)?\s*[%$€]?$/.test(val.trim());
+                                tHtml += `<td style="border:1px solid #cbd5e1;padding:5pt 8pt;text-align:${isNum ? 'right' : 'left'};">${val.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`;
+                            });
+                            tHtml += '</tr>';
+                        });
+                        tHtml += '</table>';
+                        bodyContent = tHtml;
+                    } else if (data.html) {
+                        bodyContent = data.html;
+                    } else {
+                        bodyContent = `<p style="font-size:11pt;line-height:1.6;color:#1e293b;">${(data.text || '').replace(/\n/g, '<br>')}</p>`;
+                    }
+
                     const docxHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                     <head>
                         <meta charset='utf-8'>
-                        <title>${docTitle}</title>
                         <!--[if gte mso 9]>
                         <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
                         <![endif]-->
                         <style>
                             @page { size: 21cm 29.7cm; margin: 2cm; mso-page-orientation: portrait; }
-                            body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #1e293b; }
-                            h1, h2, h3 { color: #1e40af; font-weight: bold; }
+                            body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #1e293b; }
+                            h1, h2, h3 { color: #0f172a; font-weight: bold; margin-bottom: 8pt; }
                             table { border-collapse: collapse; width: 100%; margin-bottom: 12pt; }
-                            th, td { border: 1px solid #cbd5e1; padding: 6pt; text-align: left; }
-                            th { background-color: #f8fafc; font-weight: bold; }
+                            th, td { border: 1px solid #cbd5e1; padding: 5pt 8pt; text-align: left; }
+                            th { background-color: #f1f5f9; font-weight: bold; }
+                            img { max-width: 100%; height: auto; }
                         </style>
                     </head>
                     <body>
-                        <h2 style="color:#0f172a;border-bottom:2px solid #0284c7;padding-bottom:6px;">${docTitle}</h2>
-                        ${data.html || `<p>${(data.text || '').replace(/\n/g, '<br>')}</p>`}
+                        ${bodyContent}
                     </body></html>`;
+
                     outBlob = new Blob(['\uFEFF', docxHtml], {
                         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'
                     });
                 }
+
+                // =========================================================
+                // TARGET 4: IMAGES (.png, .jpg, .webp)
+                // =========================================================
                 else if (['png', 'jpg', 'webp'].includes(target)) {
                     const mime = target === 'png' ? 'image/png' : target === 'webp' ? 'image/webp' : 'image/jpeg';
-                    let sourceDataUrl = data.dataUrl || (data.pageImages && data.pageImages[0]);
+                    let sourceDataUrl = data.dataUrl;
                     if (sourceDataUrl) {
                         outBlob = await new Promise(resolve => {
                             const img = new Image();
@@ -1451,12 +1695,20 @@
                         outBlob = await new Promise(res => canvas.toBlob(res, mime, 0.95));
                     }
                 }
+
+                // =========================================================
+                // TARGET 5: AUDIO EXTRACTION FROM VIDEO
+                // =========================================================
                 else if (target === 'wav' || target === 'mp3') {
                     const arrayBuffer = await item.file.arrayBuffer();
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                    const actx = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioBuffer = await actx.decodeAudioData(arrayBuffer);
                     outBlob = audioBufferToWav(audioBuffer);
                 }
+
+                // =========================================================
+                // TARGET 6: PLAIN TEXT / FALLBACK
+                // =========================================================
                 else {
                     outBlob = new Blob([data.text || ''], { type: 'text/plain;charset=utf-8' });
                 }
