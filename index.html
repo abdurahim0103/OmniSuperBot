@@ -2229,9 +2229,25 @@
         // FEATURE 3: PROFESSIONAL AI TRANSLATOR (Pivot-NMT Engine)
         // =============================================================
         const LANG_ISO_MAP = {
-            uz: 'uz', en: 'en', ru: 'ru', tr: 'tr', ar: 'ar',
+            auto: 'auto', uz: 'uz', en: 'en', ru: 'ru', tr: 'tr', ar: 'ar',
             zh: 'zh', es: 'es', de: 'de', fr: 'fr', ko: 'ko'
         };
+
+        const LANG_NAMES = {
+            auto: "Avtomatik",
+            uz: "O'zbek tili",
+            en: "Ingliz tili",
+            ru: "Rus tili",
+            tr: "Turk tili",
+            ar: "Arab tili",
+            zh: "Xitoy tili",
+            es: "Ispan tili",
+            de: "Nemis tili",
+            fr: "Fransuz tili",
+            ko: "Koreys tili"
+        };
+
+        let lastDetectedLang = 'en';
 
         function switchTranslatorSubMode(mode) {
             const textCont = document.getElementById('textTranslatorContainer');
@@ -2254,8 +2270,18 @@
 
         function fillSampleTranslationText(lang) {
             const el = document.getElementById('transSourceText');
-            if (lang === 'uz') el.value = 'Omni Super — sun\'iy intellekt va multimedia vositalarining yagona universal studiyasi!';
-            else el.value = 'Omni Super is a single, unified studio for all modern media and AI tools!';
+            const srcSel = document.getElementById('transSourceLang');
+            const tgtSel = document.getElementById('transTargetLang');
+
+            if (lang === 'uz') {
+                el.value = 'Omni Super — zamonaviy media vositalari va sun\'iy intellekt xizmatlarining yagona universal platformasi!';
+                srcSel.value = 'uz';
+                tgtSel.value = 'en';
+            } else {
+                el.value = 'Omni Super is a single, unified studio for all modern media and AI tools!';
+                srcSel.value = 'en';
+                tgtSel.value = 'uz';
+            }
             document.getElementById('charCountTrans').textContent = el.value.length;
             translateTextNow();
         }
@@ -2266,27 +2292,83 @@
             const srcText = document.getElementById('transSourceText');
             const tgtText = document.getElementById('transTargetText');
 
-            if (srcSel.value === 'auto') srcSel.value = 'uz';
-            const tempLang = srcSel.value;
-            srcSel.value = tgtSel.value;
-            tgtSel.value = tempLang;
+            const currentSrc = srcSel.value;
+            const currentTgt = tgtSel.value;
+
+            srcSel.value = currentTgt;
+            tgtSel.value = currentSrc === 'auto' ? (lastDetectedLang || 'uz') : currentSrc;
 
             const tempText = srcText.value;
             srcText.value = tgtText.value;
             tgtText.value = tempText;
             document.getElementById('charCountTrans').textContent = srcText.value.length;
             showToast('Tillar almashtirildi', 'info');
+
+            if (srcText.value.trim()) {
+                translateTextNow();
+            }
         }
 
         async function fetchTranslationGateway(text, sl, tl) {
-            // Tier 1: MyMemory with standard ISO & Pivot en
-            const pair = sl + '|' + tl;
-            const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`);
-            const json = await res.json();
-            if (json && json.responseData && json.responseData.translatedText && !json.responseData.translatedText.includes('PROTECTED|')) {
-                return json.responseData.translatedText;
+            if (!text || !text.trim()) return { translatedText: '', detectedLang: sl };
+
+            // Tier 1: Direct Google Translate GTX (Fastest, natural phrasing, full Uzbek support)
+            try {
+                const gUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(sl)}&tl=${encodeURIComponent(tl)}&dt=t&q=${encodeURIComponent(text)}`;
+                const res = await fetch(gUrl);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && Array.isArray(data[0])) {
+                        const translatedText = data[0].map(item => (item && item[0]) ? item[0] : '').join('');
+                        const detectedLang = data[2] || (sl !== 'auto' ? sl : 'unknown');
+                        if (translatedText.trim()) {
+                            return { translatedText, detectedLang, engine: 'google-nmt' };
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Tier 1 Google GTX error, attempting Tier 2 proxy...', err);
             }
-            throw new Error('Tier 1 failed');
+
+            // Tier 2: Netlify Edge/Function Proxy (/api/translate)
+            try {
+                const pUrl = `/api/translate?q=${encodeURIComponent(text)}&sl=${encodeURIComponent(sl)}&tl=${encodeURIComponent(tl)}`;
+                const pRes = await fetch(pUrl);
+                if (pRes.ok) {
+                    const pData = await pRes.json();
+                    if (pData && pData.translatedText && pData.translatedText.trim()) {
+                        return {
+                            translatedText: pData.translatedText,
+                            detectedLang: pData.detectedLang || sl,
+                            engine: pData.engine || 'proxy'
+                        };
+                    }
+                }
+            } catch (err) {
+                console.warn('Tier 2 Proxy error, attempting Tier 3 MyMemory...', err);
+            }
+
+            // Tier 3: MyMemory API Fallback
+            try {
+                const pair = (sl === 'auto' ? 'en' : sl) + '|' + tl;
+                const mUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(pair)}`;
+                const mRes = await fetch(mUrl);
+                if (mRes.ok) {
+                    const mData = await mRes.json();
+                    if (mData && mData.responseData && mData.responseData.translatedText) {
+                        const raw = mData.responseData.translatedText;
+                        if (!raw.includes('PROTECTED|') && !raw.includes('MYMEMORY WARNING')) {
+                            const txt = document.createElement('textarea');
+                            txt.innerHTML = raw;
+                            return { translatedText: txt.value, detectedLang: sl, engine: 'mymemory' };
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Tier 3 MyMemory error:', err);
+            }
+
+            throw new Error('Barcha tarjima dvigatellari band');
         }
 
         async function translateTextNow() {
@@ -2300,32 +2382,36 @@
             const tgtLang = document.getElementById('transTargetLang').value;
             const outBox = document.getElementById('transTargetText');
 
-            outBox.value = '⏳ Tarjima qilinmoqda (100% imlo tekshiruvi bilan)...';
-            showToast('Tarjima qilinmoqda...', 'info');
-
-            let sl = srcLang === 'auto' ? 'uz' : (LANG_ISO_MAP[srcLang] || 'uz');
-            let tl = LANG_ISO_MAP[tgtLang] || 'en';
-
-            if (sl === tl) {
+            // If user explicitly selected the same source and target language
+            if (srcLang !== 'auto' && srcLang === tgtLang) {
                 outBox.value = srcText;
-                showToast('Manba va maqsad tillari bir xil', 'info');
+                showToast(`Manba va tarjima tili bir xil (${LANG_NAMES[tgtLang] || tgtLang})`, 'info');
                 return;
             }
 
+            outBox.value = '⏳ Tarjima qilinmoqda (100% aniq va tabiiy)...';
+            showToast('Tarjima qilinmoqda...', 'info');
+
+            const sl = srcLang === 'auto' ? 'auto' : (LANG_ISO_MAP[srcLang] || srcLang);
+            const tl = LANG_ISO_MAP[tgtLang] || tgtLang;
+
             try {
-                // If direct pair might be noisy, use pivot EN
-                let result = '';
-                if ((sl === 'uz' && ['ko', 'zh', 'ar'].includes(tl)) || (['ko', 'zh', 'ar', 'tr'].includes(sl) && tl === 'uz')) {
-                    const step1 = await fetchTranslationGateway(srcText, sl, 'en');
-                    result = await fetchTranslationGateway(step1, 'en', tl);
+                const res = await fetchTranslationGateway(srcText, sl, tl);
+                outBox.value = res.translatedText;
+                lastDetectedLang = res.detectedLang || lastDetectedLang;
+
+                const detectedName = LANG_NAMES[res.detectedLang] || res.detectedLang;
+                const targetName = LANG_NAMES[tl] || tl;
+
+                if (srcLang === 'auto' && res.detectedLang && res.detectedLang !== 'unknown') {
+                    showToast(`✨ Aniqlangan til: ${detectedName} ➔ ${targetName}`, 'success');
                 } else {
-                    result = await fetchTranslationGateway(srcText, sl, tl);
+                    showToast(`✅ ${targetName}ga tarjima tayyor!`, 'success');
                 }
-                outBox.value = result;
-                showToast('Tarjima tayyor!', 'success');
-            } catch(e) {
-                outBox.value = `[${tgtLang.toUpperCase()}]: ${srcText}`;
-                showToast('Tarjima yakunlandi', 'success');
+            } catch (e) {
+                console.error('Translation error:', e);
+                outBox.value = srcText;
+                showToast('Tarjima xizmati vaqtincha band, qayta urinib ko\'ring', 'error');
             }
         }
 

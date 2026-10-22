@@ -33,3 +33,7 @@
 [[edge_functions]]
   path = "/api/download"
   function = "download"
+
+[[edge_functions]]
+  path = "/api/translate"
+  function = "translate"
