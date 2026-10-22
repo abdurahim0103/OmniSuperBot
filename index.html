@@ -148,14 +148,13 @@
                 <div class="relative">
                     <button id="featuresDropdownBtn" onclick="toggleFeaturesVerticalMenu()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-fuchsia-500/20 hover:from-cyan-500/30 hover:to-fuchsia-500/30 border border-white/15 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition">
                         <i data-lucide="LayoutGrid" class="w-4 h-4 text-cyan-400"></i>
-                        <span class="hidden sm:inline">⚡ Funksiyalar (6 ta Asbob)</span>
-                        <span class="sm:hidden">⚡ Asboblar</span>
+                        <span>Funksiyalar</span>
                         <i data-lucide="ChevronDown" id="featuresChevron" class="w-4 h-4 text-slate-300 transition-transform"></i>
                     </button>
 
                     <!-- Collapsible Vertical Features Drawer / Menu -->
                     <div id="featuresVerticalMenu" class="hidden absolute top-full left-0 mt-2.5 w-72 sm:w-80 bg-space-950/95 border border-white/15 rounded-2xl p-2.5 shadow-2xl backdrop-blur-2xl z-50 space-y-1.5 animate-fadeIn">
-                        <button onclick="selectFeatureFromVerticalMenu('converter')" class="w-full text-left p-2.5 rounded-xl hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 flex items-center gap-3 transition group">
+                        <button id="vmenu-converter" onclick="selectFeatureFromVerticalMenu('converter')" class="w-full text-left p-2.5 rounded-xl hover:bg-cyan-500/15 border border-transparent hover:border-cyan-500/30 flex items-center gap-3 transition group">
                             <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
                                 <i data-lucide="FileSpreadsheet" class="w-4 h-4"></i>
                             </div>
@@ -164,7 +163,7 @@
                                 <span class="text-[10px] text-slate-400 block">Excel, Word, PDF (.docx tayyor)</span>
                             </div>
                         </button>
-                        <button onclick="selectFeatureFromVerticalMenu('downloader')" class="w-full text-left p-2.5 rounded-xl hover:bg-sky-500/15 border border-transparent hover:border-sky-500/30 flex items-center gap-3 transition group">
+                        <button id="vmenu-downloader" onclick="selectFeatureFromVerticalMenu('downloader')" class="w-full text-left p-2.5 rounded-xl hover:bg-sky-500/15 border border-transparent hover:border-sky-500/30 flex items-center gap-3 transition group">
                             <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
                                 <i data-lucide="DownloadCloud" class="w-4 h-4"></i>
                             </div>
@@ -173,7 +172,7 @@
                                 <span class="text-[10px] text-slate-400 block">TikTok, Instagram + 5-10s Musiqa qidirish</span>
                             </div>
                         </button>
-                        <button onclick="selectFeatureFromVerticalMenu('translator')" class="w-full text-left p-2.5 rounded-xl hover:bg-emerald-500/15 border border-transparent hover:border-emerald-500/30 flex items-center gap-3 transition group">
+                        <button id="vmenu-translator" onclick="selectFeatureFromVerticalMenu('translator')" class="w-full text-left p-2.5 rounded-xl hover:bg-emerald-500/15 border border-transparent hover:border-emerald-500/30 flex items-center gap-3 transition group">
                             <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                                 <i data-lucide="Languages" class="w-4 h-4"></i>
                             </div>
@@ -182,7 +181,7 @@
                                 <span class="text-[10px] text-slate-400 block">10 ta jahon tili • Matn & Rasm</span>
                             </div>
                         </button>
-                        <button onclick="selectFeatureFromVerticalMenu('pixar')" class="w-full text-left p-2.5 rounded-xl hover:bg-fuchsia-500/15 border border-transparent hover:border-fuchsia-500/30 flex items-center gap-3 transition group">
+                        <button id="vmenu-pixar" onclick="selectFeatureFromVerticalMenu('pixar')" class="w-full text-left p-2.5 rounded-xl hover:bg-fuchsia-500/15 border border-transparent hover:border-fuchsia-500/30 flex items-center gap-3 transition group">
                             <div class="w-8 h-8 rounded-lg bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center shrink-0">
                                 <i data-lucide="Sparkles" class="w-4 h-4"></i>
                             </div>
@@ -191,7 +190,7 @@
                                 <span class="text-[10px] text-slate-400 block">Haqiqiy 3D multfilm shaderi</span>
                             </div>
                         </button>
-                        <button onclick="selectFeatureFromVerticalMenu('magic')" class="w-full text-left p-2.5 rounded-xl hover:bg-violet-500/15 border border-transparent hover:border-violet-500/30 flex items-center gap-3 transition group">
+                        <button id="vmenu-magic" onclick="selectFeatureFromVerticalMenu('magic')" class="w-full text-left p-2.5 rounded-xl hover:bg-violet-500/15 border border-transparent hover:border-violet-500/30 flex items-center gap-3 transition group">
                             <div class="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center shrink-0">
                                 <i data-lucide="Wand2" class="w-4 h-4"></i>
                             </div>
@@ -200,7 +199,7 @@
                                 <span class="text-[10px] text-slate-400 block">Google MediaPipe 100% fon tozalash</span>
                             </div>
                         </button>
-                        <button onclick="selectFeatureFromVerticalMenu('audio')" class="w-full text-left p-2.5 rounded-xl hover:bg-amber-500/15 border border-transparent hover:border-amber-500/30 flex items-center gap-3 transition group">
+                        <button id="vmenu-audio" onclick="selectFeatureFromVerticalMenu('audio')" class="w-full text-left p-2.5 rounded-xl hover:bg-amber-500/15 border border-transparent hover:border-amber-500/30 flex items-center gap-3 transition group">
                             <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
                                 <i data-lucide="Film" class="w-4 h-4"></i>
                             </div>
@@ -242,44 +241,6 @@
 
     <!-- Master Workspace Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 z-10">
-
-        <!-- Unified 6-Feature Navigation Dock -->
-        <div class="bg-space-900/90 border border-white/10 p-1.5 rounded-2xl shadow-xl backdrop-blur-xl overflow-x-auto">
-            <nav class="flex items-center gap-1.5 min-w-max" id="masterTabsNav">
-                <!-- 1. Converter -->
-                <button id="tab-converter" onclick="switchMainTab('converter')" class="px-3.5 sm:px-4 py-2.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition cursor-pointer">
-                    <i data-lucide="FileSpreadsheet" class="w-4 h-4 text-cyan-400"></i>
-                    <span data-i18n="tabConverter">1. Fayl Konvertori</span>
-                </button>
-                <!-- 2. Downloader -->
-                <button id="tab-downloader" onclick="switchMainTab('downloader')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
-                    <i data-lucide="DownloadCloud" class="w-4 h-4 text-sky-400"></i>
-                    <span data-i18n="tabDownloader">2. Video & MP3</span>
-                </button>
-                <!-- 3. Translator -->
-                <button id="tab-translator" onclick="switchMainTab('translator')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
-                    <i data-lucide="Languages" class="w-4 h-4 text-emerald-400"></i>
-                    <span data-i18n="tabTranslator">3. AI Tarjimon</span>
-                </button>
-                <!-- 4. 3D Pixar -->
-                <button id="tab-pixar" onclick="switchMainTab('pixar')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
-                    <i data-lucide="Sparkles" class="w-4 h-4 text-fuchsia-400"></i>
-                    <span data-i18n="tabPixar">4. 3D Pixar Obraz</span>
-                </button>
-                <!-- 5. AI Magic Studio -->
-                <button id="tab-magic" onclick="switchMainTab('magic')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
-                    <i data-lucide="Wand2" class="w-4 h-4 text-violet-400"></i>
-                    <span data-i18n="tabMagic">5. AI Magic Studio</span>
-                    <span class="px-1.5 py-0.2 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 text-[9px] font-mono font-bold uppercase">Yangi</span>
-                </button>
-                <!-- 6. Audio Studio & Visualizer -->
-                <button id="tab-audio" onclick="switchMainTab('audio')" class="px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
-                    <i data-lucide="Radio" class="w-4 h-4 text-amber-400"></i>
-                    <span data-i18n="tabAudio">6. Audio & Spektr</span>
-                    <span class="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[9px] font-mono font-bold uppercase">60 FPS</span>
-                </button>
-            </nav>
-        </div>
 
         <!-- ============================================================= -->
         <!-- FEATURE 1: FAYL KONVERTOR (Quantum Cyan & Indigo Matrix)      -->
@@ -1116,15 +1077,22 @@
                 const viewEl = document.getElementById('view-' + tab);
                 const navBtn = document.getElementById('tab-' + tab);
 
+                const vItem = document.getElementById("vmenu-" + tab);
                 if (tab === activeTab) {
-                    if (viewEl) viewEl.classList.remove('hidden');
+                    if (viewEl) viewEl.classList.remove("hidden");
                     if (navBtn) {
-                        navBtn.className = 'px-3.5 sm:px-4 py-2.5 rounded-xl border font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition cursor-pointer ' + (TAB_GLOW_CLASSES[tab] || 'bg-cyan-500/20 text-cyan-300');
+                        navBtn.className = "px-3.5 sm:px-4 py-2.5 rounded-xl border font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition cursor-pointer " + (TAB_GLOW_CLASSES[tab] || "bg-cyan-500/20 text-cyan-300");
+                    }
+                    if (vItem) {
+                        vItem.classList.add("bg-white/10", "border-white/25");
                     }
                 } else {
-                    if (viewEl) viewEl.classList.add('hidden');
+                    if (viewEl) viewEl.classList.add("hidden");
                     if (navBtn) {
-                        navBtn.className = 'px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer';
+                        navBtn.className = "px-3.5 sm:px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-semibold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer";
+                    }
+                    if (vItem) {
+                        vItem.classList.remove("bg-white/10", "border-white/25");
                     }
                 }
             });
