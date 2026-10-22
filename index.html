@@ -617,11 +617,11 @@
 
                     <!-- Demo portraits -->
                     <div class="bg-space-950 border border-fuchsia-500/20 rounded-2xl p-3 shrink-0 space-y-1.5">
-                        <span class="text-[11px] font-bold text-fuchsia-300 uppercase block">⚡ Tayyor Namuna:</span>
+                        <span class="text-[11px] font-bold text-fuchsia-300 uppercase block">⚡ Tayyor Namunalar:</span>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="loadPixarSample('person')" class="px-2.5 py-1 rounded-xl bg-fuchsia-500/15 text-fuchsia-200 text-xs font-semibold transition">🧑 Inson</button>
-                            <button onclick="loadPixarSample('pet')" class="px-2.5 py-1 rounded-xl bg-amber-500/15 text-amber-200 text-xs font-semibold transition">🐱 Mushukcha</button>
-                            <button onclick="loadPixarSample('object')" class="px-2.5 py-1 rounded-xl bg-cyan-500/15 text-cyan-200 text-xs font-semibold transition">🚗 Avtomobil</button>
+                            <button onclick="loadPixarSample('person')" class="px-2.5 py-1 rounded-xl bg-fuchsia-500/15 hover:bg-fuchsia-500/25 text-fuchsia-200 text-xs font-semibold transition">🧑 Inson Portreti</button>
+                            <button onclick="loadPixarSample('pet')" class="px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 text-xs font-semibold transition">🐱 Uy Hayvoni</button>
+                            <button onclick="loadPixarSample('object')" class="px-2.5 py-1 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-200 text-xs font-semibold transition">🚗 Buyum / Mashina</button>
                         </div>
                     </div>
                 </div>
@@ -631,11 +631,15 @@
                     <!-- Left: Upload & Style -->
                     <div class="lg:col-span-5 bg-space-950 border border-fuchsia-500/20 rounded-2xl p-5 space-y-4">
                         <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-300 uppercase block">1. Multfilm Uslubi:</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                <button onclick="selectPixarStyle('pixar')" id="styleBtn_pixar" class="px-2.5 py-2 rounded-xl bg-fuchsia-600 text-white text-xs font-bold border border-fuchsia-400 text-center shadow">🎬 3D Pixar</button>
-                                <button onclick="selectPixarStyle('dreamworks')" id="styleBtn_dreamworks" class="px-2.5 py-2 rounded-xl bg-space-900 text-slate-300 text-xs font-semibold border border-white/10 text-center">🦁 DreamWorks</button>
-                                <button onclick="selectPixarStyle('anime')" id="styleBtn_anime" class="px-2.5 py-2 rounded-xl bg-space-900 text-slate-300 text-xs font-semibold border border-white/10 text-center">🌸 Ghibli</button>
+                            <label class="text-xs font-bold text-slate-300 uppercase block">1. Multfilm Formati:</label>
+                            <div class="p-3 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/30 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-fuchsia-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg shadow-fuchsia-500/20">
+                                    <i data-lucide="Sparkles" class="w-5 h-5 text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-white">🎬 3D Pixar & Disney Multfilm Qahramoni</h4>
+                                    <p class="text-[11px] text-fuchsia-200/80">Inson, hayvon yoki buyumni haqiqiy animatsiya qahramoniga aylantiradi</p>
+                                </div>
                             </div>
                         </div>
 
@@ -663,13 +667,9 @@
                             </div>
                             <!-- Download bar -->
                             <div id="pixarDownloadBar" class="flex gap-2">
-                                <button onclick="downloadPixarResult()" class="px-3.5 py-1.5 rounded-xl bg-fuchsia-500 hover:bg-fuchsia-400 text-black text-xs font-extrabold flex items-center gap-1.5 shadow-lg transition">
+                                <button onclick="downloadPixarResult()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-400 hover:to-purple-500 text-white text-xs font-extrabold flex items-center gap-2 shadow-lg shadow-fuchsia-500/25 transition cursor-pointer">
                                     <i data-lucide="Download" class="w-4 h-4"></i>
-                                    <span data-i18n="pxDownloadPng">4K PNG Yuklab Olish</span>
-                                </button>
-                                <button onclick="downloadPixarModel()" class="px-3 py-1.5 rounded-xl bg-space-900 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold flex items-center gap-1">
-                                    <i data-lucide="Box" class="w-3.5 h-3.5"></i>
-                                    <span data-i18n="pxDownloadObj">.OBJ</span>
+                                    <span data-i18n="pxDownloadPng">📥 2K HD PNG Yuklab Olish</span>
                                 </button>
                             </div>
                         </div>
@@ -2518,20 +2518,7 @@
         // FEATURE 4: 3D PIXAR ANIMATOR ENGINE (WebGL / Canvas Shader)
         // =============================================================
         let currentPixarImg = null;
-        let currentPixarStyle = 'pixar';
         let currentPixarResultUrl = null;
-
-        function selectPixarStyle(style) {
-            currentPixarStyle = style;
-            ['pixar', 'dreamworks', 'anime'].forEach(s => {
-                const btn = document.getElementById('styleBtn_' + s);
-                if (btn) {
-                    if (s === style) btn.className = 'px-2.5 py-2 rounded-xl bg-fuchsia-600 text-white text-xs font-bold border border-fuchsia-400 text-center shadow';
-                    else btn.className = 'px-2.5 py-2 rounded-xl bg-space-900 text-slate-300 text-xs font-semibold border border-white/10 text-center';
-                }
-            });
-            if (currentPixarImg) generatePixarAnimation();
-        }
 
         function handlePixarFileSelect(files) {
             if (!files || !files[0]) return;
@@ -2548,156 +2535,199 @@
         }
 
         function loadPixarSample(type) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 600; canvas.height = 600;
-            const ctx = canvas.getContext('2d');
+            showToast('Namuna rasm yuklanmoqda...', 'info');
+            const sampleUrls = {
+                person: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85',
+                pet: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=85',
+                object: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=85'
+            };
 
-            if (type === 'pet') {
-                const grad = ctx.createLinearGradient(0, 0, 600, 600);
-                grad.addColorStop(0, '#f59e0b'); grad.addColorStop(1, '#d97706');
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, 600, 600);
-                ctx.fillStyle = '#fed7aa'; ctx.beginPath(); ctx.ellipse(300, 320, 140, 130, 0, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.moveTo(190, 240); ctx.lineTo(230, 140); ctx.lineTo(270, 220); ctx.fill();
-                ctx.beginPath(); ctx.moveTo(410, 240); ctx.lineTo(370, 140); ctx.lineTo(330, 220); ctx.fill();
-                ctx.fillStyle = '#0284c7'; ctx.beginPath(); ctx.ellipse(250, 310, 25, 30, 0, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.ellipse(350, 310, 25, 30, 0, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(245, 300, 8, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(345, 300, 8, 0, Math.PI * 2); ctx.fill();
-            } else if (type === 'object') {
-                const grad = ctx.createLinearGradient(0, 0, 600, 600);
-                grad.addColorStop(0, '#0284c7'); grad.addColorStop(1, '#0369a1');
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, 600, 600);
-                ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.roundRect(160, 280, 280, 120, 30); ctx.fill();
-                ctx.fillStyle = '#bae6fd'; ctx.beginPath(); ctx.roundRect(200, 220, 200, 90, 20); ctx.fill();
-                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(220, 400, 35, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(380, 400, 35, 0, Math.PI * 2); ctx.fill();
-            } else {
-                const grad = ctx.createLinearGradient(0, 0, 600, 600);
-                grad.addColorStop(0, '#d946ef'); grad.addColorStop(1, '#7e22ce');
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, 600, 600);
-                ctx.fillStyle = '#fed7aa'; ctx.beginPath(); ctx.ellipse(300, 320, 120, 150, 0, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.ellipse(260, 310, 20, 25, 0, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.ellipse(340, 310, 20, 25, 0, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(255, 302, 7, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(335, 302, 7, 0, Math.PI * 2); ctx.fill();
-            }
-
+            const url = sampleUrls[type] || sampleUrls.person;
             const img = new Image();
+            img.crossOrigin = 'anonymous';
             img.onload = () => {
                 currentPixarImg = img;
                 generatePixarAnimation();
             };
-            img.src = canvas.toDataURL('image/png');
+            img.onerror = () => {
+                showToast('Namuna rasmini yuklab bo\'lmadi, o\'z rasmingizni yuklang', 'error');
+            };
+            img.src = url;
         }
 
-                async function generatePixarAnimation() {
+        async function generatePixarAnimation() {
             if (!currentPixarImg) {
                 loadPixarSample('person');
                 return;
             }
 
-            showToast('✨ 3D Pixar multfilm obrazi render qilinmoqda...', 'info');
-            const targetW = Math.min(currentPixarImg.naturalWidth || 800, 1000);
-            const scale = targetW / (currentPixarImg.naturalWidth || 800);
-            const targetH = Math.round((currentPixarImg.naturalHeight || 600) * scale);
+            showToast('✨ 3D Pixar multfilm qahramoniga aylantirilmoqda...', 'info');
+            const statusBadge = document.getElementById('pixarStatusBadge');
+            if (statusBadge) statusBadge.textContent = '3D Render Jarayoni...';
+
+            const maxDim = 800;
+            let targetW = currentPixarImg.naturalWidth || 800;
+            let targetH = currentPixarImg.naturalHeight || 600;
+
+            if (targetW > maxDim || targetH > maxDim) {
+                if (targetW > targetH) {
+                    targetH = Math.round((targetH * maxDim) / targetW);
+                    targetW = maxDim;
+                } else {
+                    targetW = Math.round((targetW * maxDim) / targetH);
+                    targetH = maxDim;
+                }
+            }
 
             const c = document.createElement('canvas');
-            c.width = targetW; c.height = targetH;
+            c.width = targetW;
+            c.height = targetH;
             const ctx = c.getContext('2d');
             ctx.drawImage(currentPixarImg, 0, 0, targetW, targetH);
 
             const imgData = ctx.getImageData(0, 0, targetW, targetH);
             const d = imgData.data;
-            const w = targetW, h = targetH;
-
-            // Step 1: Bilateral skin smoothing + Pixar warm saturation
+            const w = targetW;
+            const h = targetH;
             const copy = new Uint8ClampedArray(d);
-            for (let y = 1; y < h - 1; y++) {
-                for (let x = 1; x < w - 1; x++) {
-                    const idx = (y * w + x) * 4;
-                    let r = copy[idx], g = copy[idx+1], b = copy[idx+2];
-                    
-                    // Warm saturation boost
-                    const avg = (r + g + b) / 3;
-                    r = Math.min(255, Math.max(0, avg + (r - avg) * 1.45 + 18));
-                    g = Math.min(255, Math.max(0, avg + (g - avg) * 1.35 + 10));
-                    b = Math.min(255, Math.max(0, avg + (b - avg) * 1.3));
 
-                    // 6-step Cel-Shading quantization (stepped 3D color bands)
-                    const step = 28;
-                    d[idx]   = Math.round(r / step) * step;
-                    d[idx+1] = Math.round(g / step) * step;
-                    d[idx+2] = Math.round(b / step) * step;
+            // Step 1: Anisotropic Kuwahara Filter (Silky smooth skin & fur without edge blurring)
+            const r = 3;
+            const quads = [
+                [-r, 0, -r, 0],
+                [0, r, -r, 0],
+                [-r, 0, 0, r],
+                [0, r, 0, r]
+            ];
+
+            for (let y = r; y < h - r; y++) {
+                const row = y * w;
+                for (let x = r; x < w - r; x++) {
+                    let minVar = Infinity;
+                    let bR = 0, bG = 0, bB = 0;
+
+                    for (let q = 0; q < 4; q++) {
+                        const [x1, x2, y1, y2] = quads[q];
+                        let sumR = 0, sumG = 0, sumB = 0, sumSq = 0, count = 0;
+
+                        for (let dy = y1; dy <= y2; dy++) {
+                            const qRow = (y + dy) * w;
+                            for (let dx = x1; dx <= x2; dx++) {
+                                const idx = (qRow + (x + dx)) * 4;
+                                const pr = copy[idx];
+                                const pg = copy[idx + 1];
+                                const pb = copy[idx + 2];
+                                sumR += pr;
+                                sumG += pg;
+                                sumB += pb;
+                                const luma = (pr * 299 + pg * 587 + pb * 114) >> 10;
+                                sumSq += luma * luma;
+                                count++;
+                            }
+                        }
+
+                        const meanL = (sumR * 299 + sumG * 587 + sumB * 114) / (count * 1024);
+                        const vr = (sumSq / count) - (meanL * meanL);
+                        if (vr < minVar) {
+                            minVar = vr;
+                            bR = sumR / count;
+                            bG = sumG / count;
+                            bB = sumB / count;
+                        }
+                    }
+
+                    const outIdx = (row + x) * 4;
+                    // Step 2: Natural Pixar color saturation (No red tint!)
+                    const luma = 0.299 * bR + 0.587 * bG + 0.114 * bB;
+                    let nR = luma + (bR - luma) * 1.25;
+                    let nG = luma + (bG - luma) * 1.25;
+                    let nB = luma + (bB - luma) * 1.25;
+
+                    // Soft cel-banding
+                    const step = 24;
+                    nR = Math.round(nR / step) * step * 0.4 + nR * 0.6;
+                    nG = Math.round(nG / step) * step * 0.4 + nG * 0.6;
+                    nB = Math.round(nB / step) * step * 0.4 + nB * 0.6;
+
+                    d[outIdx]     = Math.min(255, Math.max(0, nR));
+                    d[outIdx + 1] = Math.min(255, Math.max(0, nG));
+                    d[outIdx + 2] = Math.min(255, Math.max(0, nB));
                 }
             }
 
-            // Step 2: Sobel Edge Detection for Cartoon Outlines (Inking)
-            const edgeData = new Uint8ClampedArray(d.length);
+            // Step 3: Adaptive Edge Inking for 3D Cartoon Outlines
             for (let y = 1; y < h - 1; y++) {
                 for (let x = 1; x < w - 1; x++) {
                     const i = (y * w + x) * 4;
-                    // Grayscale surrounding pixels
-                    const p00 = (copy[((y-1)*w + (x-1))*4] + copy[((y-1)*w + (x-1))*4+1] + copy[((y-1)*w + (x-1))*4+2]) / 3;
-                    const p02 = (copy[((y-1)*w + (x+1))*4] + copy[((y-1)*w + (x+1))*4+1] + copy[((y-1)*w + (x+1))*4+2]) / 3;
-                    const p10 = (copy[(y*w + (x-1))*4]     + copy[(y*w + (x-1))*4+1]     + copy[(y*w + (x-1))*4+2])     / 3;
-                    const p12 = (copy[(y*w + (x+1))*4]     + copy[(y*w + (x+1))*4+1]     + copy[(y*w + (x+1))*4+2])     / 3;
-                    const p20 = (copy[((y+1)*w + (x-1))*4] + copy[((y+1)*w + (x-1))*4+1] + copy[((y+1)*w + (x-1))*4+2]) / 3;
-                    const p22 = (copy[((y+1)*w + (x+1))*4] + copy[((y+1)*w + (x+1))*4+1] + copy[((y+1)*w + (x+1))*4+2]) / 3;
+                    const p00 = (copy[((y-1)*w + (x-1))*4]*299 + copy[((y-1)*w + (x-1))*4+1]*587 + copy[((y-1)*w + (x-1))*4+2]*114) >> 10;
+                    const p02 = (copy[((y-1)*w + (x+1))*4]*299 + copy[((y-1)*w + (x+1))*4+1]*587 + copy[((y-1)*w + (x+1))*4+2]*114) >> 10;
+                    const p10 = (copy[(y*w + (x-1))*4]*299     + copy[(y*w + (x-1))*4+1]*587     + copy[(y*w + (x-1))*4+2]*114)     >> 10;
+                    const p12 = (copy[(y*w + (x+1))*4]*299     + copy[(y*w + (x+1))*4+1]*587     + copy[(y*w + (x+1))*4+2]*114)     >> 10;
+                    const p20 = (copy[((y+1)*w + (x-1))*4]*299 + copy[((y+1)*w + (x-1))*4+1]*587 + copy[((y+1)*w + (x-1))*4+2]*114) >> 10;
+                    const p22 = (copy[((y+1)*w + (x+1))*4]*299 + copy[((y+1)*w + (x+1))*4+1]*587 + copy[((y+1)*w + (x+1))*4+2]*114) >> 10;
 
                     const gx = -p00 + p02 - 2*p10 + 2*p12 - p20 + p22;
-                    const gy = -p00 - 2*(copy[((y-1)*w + x)*4]) - p02 + p20 + 2*(copy[((y+1)*w + x)*4]) + p22;
-                    const gMagnitude = Math.sqrt(gx * gx + gy * gy);
+                    const pTop = (copy[((y-1)*w + x)*4]*299 + copy[((y-1)*w + x)*4+1]*587 + copy[((y-1)*w + x)*4+2]*114) >> 10;
+                    const pBot = (copy[((y+1)*w + x)*4]*299 + copy[((y+1)*w + x)*4+1]*587 + copy[((y+1)*w + x)*4+2]*114) >> 10;
+                    const gy = -p00 - 2*pTop - p02 + p20 + 2*pBot + p22;
 
-                    if (gMagnitude > 52) {
-                        // Apply dark cartoon edge
-                        d[i]   = Math.round(d[i] * 0.35);
-                        d[i+1] = Math.round(d[i+1] * 0.35);
-                        d[i+2] = Math.round(d[i+2] * 0.35);
+                    const gMagnitude = Math.sqrt(gx * gx + gy * gy);
+                    if (gMagnitude > 48) {
+                        const factor = Math.max(0.42, 1 - (gMagnitude / 320));
+                        d[i]   = Math.round(d[i] * factor);
+                        d[i+1] = Math.round(d[i+1] * factor);
+                        d[i+2] = Math.round(d[i+2] * factor);
                     }
                 }
             }
+
             ctx.putImageData(imgData, 0, 0);
 
-            // Step 3: Pixar Subsurface Scattering Glow & Rim Lighting
+            // Step 4: Pixar Studio Ambient Glow & Rim Lighting
             ctx.save();
             ctx.globalCompositeOperation = 'screen';
-            ctx.filter = 'blur(8px)';
-            ctx.globalAlpha = 0.35;
+            ctx.filter = 'blur(6px)';
+            ctx.globalAlpha = 0.18;
             ctx.drawImage(c, 0, 0);
-            ctx.restore();
-
-            // Step 4: Specular Eye & Facial Gloss Highlights
-            ctx.save();
-            ctx.globalCompositeOperation = 'soft-light';
-            const grad = ctx.createRadialGradient(w * 0.5, h * 0.35, w * 0.1, w * 0.5, h * 0.5, w * 0.65);
-            grad.addColorStop(0, 'rgba(255, 250, 235, 0.45)');
-            grad.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, w, h);
             ctx.restore();
 
             currentPixarResultUrl = c.toDataURL('image/png');
             const preview = document.getElementById('pixarResultPreview');
             if (preview) preview.src = currentPixarResultUrl;
-            showToast('✨ Haqiqiy 3D Pixar multfilm obrazi tayyor!', 'success');
+            if (statusBadge) statusBadge.textContent = '3D Pixar Qahramoni Tayyor';
+            showToast('✨ 3D Pixar multfilm obrazi muvaffaqiyatli yaratildi!', 'success');
         }
 
         function downloadPixarResult() {
-            if (!currentPixarResultUrl) { generatePixarAnimation(); return; }
-            const a = document.createElement('a');
-            a.href = currentPixarResultUrl;
-            a.download = `3D_Pixar_Character_${Date.now()}.png`;
-            a.click();
-        }
+            if (!currentPixarResultUrl) {
+                if (currentPixarImg) generatePixarAnimation();
+                else showToast('Avval rasm yuklang yoki namunani tanlang!', 'info');
+                return;
+            }
+            showToast('2K HD PNG sifatda tayyorlanmoqda...', 'info');
 
-        function downloadPixarModel() {
-            const objContent = "# Wavefront OBJ 3D Character Export\nv -0.5 -0.5 0.5\nv 0.5 -0.5 0.5\nv 0.5 0.5 0.5\nv -0.5 0.5 0.5\nf 1 2 3 4\n";
-            const blob = new Blob([objContent], { type: 'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Pixar_Model_${Date.now()}.obj`;
-            a.click();
-            showToast('3D Model (.OBJ) yuklab olindi!', 'success');
+            const img = new Image();
+            img.onload = () => {
+                const expCanvas = document.createElement('canvas');
+                const targetW = 2048;
+                const scale = targetW / img.width;
+                expCanvas.width = targetW;
+                expCanvas.height = Math.round(img.height * scale);
+
+                const expCtx = expCanvas.getContext('2d');
+                expCtx.imageSmoothingEnabled = true;
+                expCtx.imageSmoothingQuality = 'high';
+                expCtx.drawImage(img, 0, 0, expCanvas.width, expCanvas.height);
+
+                const a = document.createElement('a');
+                a.href = expCanvas.toDataURL('image/png', 0.95);
+                a.download = `3D_Pixar_Character_2K_${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast('2K HD PNG muvaffaqiyatli yuklab olindi!', 'success');
+            };
+            img.src = currentPixarResultUrl;
         }
 
         // =============================================================
