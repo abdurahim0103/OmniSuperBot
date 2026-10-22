@@ -26,3 +26,10 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(self), microphone=(self)"
+
+[functions]
+  directory = "netlify/functions"
+
+[[edge_functions]]
+  path = "/api/download"
+  function = "download"
